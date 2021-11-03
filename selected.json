@@ -1,0 +1,50 @@
+{
+	"rarity": "Restricted",
+	"isValidInput": true,
+	"$and": [
+		{
+			"$or": [
+				{
+					"FN.stashVal": {
+						"$lte": 9007199254740991,
+						"$gte": 0
+					}
+				},
+				{
+					"MW.stashVal": {
+						"$lte": 9007199254740991,
+						"$gte": 0
+					}
+				},
+				{
+					"FT.stashVal": {
+						"$lte": 9007199254740991,
+						"$gte": 0
+					}
+				},
+				{
+					"WW.stashVal": {
+						"$lte": 9007199254740991,
+						"$gte": 0
+					}
+				},
+				{
+					"BS.stashVal": {
+						"$lte": 9007199254740991,
+						"$gte": 0
+					}
+				}
+			]
+		},
+		{
+			"$or": [
+				{
+					"source": "eSports 2014 Summer Case"
+				},
+				{
+					"source": "Prisma 2 Case"
+				}
+			]
+		}
+	]
+}
