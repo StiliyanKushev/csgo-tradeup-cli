@@ -33,6 +33,8 @@ const cmdHelp = (print=true) => {
     `--results           -> Give maximum number of results before stopping. (Ex: --results 10)                                                     `.bgCyan.black + '\n' +
     `--sources           -> Give maximum number of sources per each tradeup. (Ex: --sources 2)                                                     `.bgCyan.black + '\n' +
     `--rarity            -> Pick the rarity to use for inputs. (Ex: --rarity "Mil-Spec")                                                           `.bgCyan.black + '\n' +
+    `--allowStattrak     -> Include stattrak trade ups.                                                                                            `.bgCyan.black + '\n' +
+    `--onlyStattrak      -> Include ONLY stattrak trade ups.                                                                                       `.bgCyan.black + '\n' +
     `--profit            -> When to save a tradeup as profitable. (Ex: --profit 115)                                                               `.bgCyan.black + '\n' +
     `--minVal            -> Minimum input skin value when generating an input skin. (Ex: --maxVal 1)                                               `.bgCyan.black + '\n' +
     `--maxVal            -> Maximum input skin value when generating an input skin. (Ex: --maxVal 2)                                               `.bgCyan.black + '\n' +
@@ -65,6 +67,10 @@ const cmdExit = () => {
 const cmdError = (err) => {
     console.log(err.bgWhite.red);
     cmdExit();
+}
+
+const cmdWarn = (msg) => {
+    console.log(`NOTE: ${msg}`.bgBlack.yellow);
 }
 
 const cmdCheckArgs = () => {
@@ -123,5 +129,6 @@ module.exports = {
     cmdHelp,
     cmdExit,
     cmdError,
+    cmdWarn,
     getArgsVal
 }

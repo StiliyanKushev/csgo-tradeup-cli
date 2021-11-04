@@ -4,7 +4,7 @@ const readline = require('readline');
 const Skin = require('../models/skin');
 const { getRandomSkins, getNextSkinFloat, getSkinFloatLimits, getRandomSources } = require('../utils/skin');
 const { differentiateBy, randomArb, normalize, randomArr } = require('../utils/general');
-const { getArgsVal, cmdError } = require('../cmd');
+const { getArgsVal, cmdError, cmdExit } = require('../cmd');
 const { numberToRarity, rarityToNumber, RARITIES } = require('../utils/rarity');
 const { numToSkinFloat, avrgFloat } = require('../utils/skin');
 const { generateTradespyLink } = require('../tradeupspy');
@@ -12,7 +12,8 @@ const Source = require('../models/source');
 const { advancedGunScrape } = require('../scrape');
 
 class Agent {
-    constructor(rarity){
+    constructor(rarity, stattrak){
+        this.stattrak = stattrak;
         this.id = Number(Math.random().toString().substr(2));
         this.rarity = rarity;
         this.inputs = []; // the inputs are the dna of the agent
@@ -36,18 +37,29 @@ class Agent {
         else {
             let maxVal = getArgsVal('--maxVal', 'number') || Number.MAX_SAFE_INTEGER;
             let minVal = getArgsVal('--minVal', 'number') || 0;
+            
+            let normalSkins = [
+                { 'FN.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'MW.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'FT.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'WW.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'BS.stashVal': { $lte: maxVal, $gte: minVal } }
+            ];
+
+            let stattrakSkins = [
+                { 'STAT_TRAK.FN.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'STAT_TRAK.MW.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'STAT_TRAK.FT.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'STAT_TRAK.WW.stashVal': { $lte: maxVal, $gte: minVal } },
+                { 'STAT_TRAK.BS.stashVal': { $lte: maxVal, $gte: minVal } }
+            ]
+
             let query = {
                 rarity: this.rarity,
                 isValidInput: true,
                 $and: [
                     {
-                        $or: [
-                            { 'FN.stashVal': { $lte: maxVal, $gte: minVal } },
-                            { 'MW.stashVal': { $lte: maxVal, $gte: minVal } },
-                            { 'FT.stashVal': { $lte: maxVal, $gte: minVal } },
-                            { 'WW.stashVal': { $lte: maxVal, $gte: minVal } },
-                            { 'BS.stashVal': { $lte: maxVal, $gte: minVal } }
-                        ]
+                        $or: this.stattrak ? stattrakSkins : normalSkins
                     },
                 ]
             }
@@ -137,7 +149,7 @@ class Agent {
         return [all[rarity], rarities];
     }
 
-    async override(input=undefined, asd){
+    async override(input=undefined){
         if(!args.includes('--override')) return input;
         let path = getArgsVal('--override', 'path');
 
@@ -301,8 +313,10 @@ class Agent {
                 source: e.source,
                 float: e.float,
                 condition: numToSkinFloat(e.float),
-                price: e[numToSkinFloat(e.float)].stashVal,
-                link: e[numToSkinFloat(e.float)].steamLink
+                price: this.stattrak ? e.STAT_TRAK[numToSkinFloat(e.float)].stashVal
+                                     : e[numToSkinFloat(e.float)].stashVal,
+                link: this.stattrak  ? e.STAT_TRAK[numToSkinFloat(e.float)].steamLink
+                                     : e[numToSkinFloat(e.float)].steamLink,
             });
         })
 
@@ -312,24 +326,27 @@ class Agent {
                 source: e.source,
                 float: e.float,
                 condition: numToSkinFloat(e.float),
-                price: e[numToSkinFloat(e.float)].stashVal,
-                link: e[numToSkinFloat(e.float)].steamLink
+                price: this.stattrak ? e.STAT_TRAK[numToSkinFloat(e.float)].stashVal
+                                     : e[numToSkinFloat(e.float)].stashVal,
+                link: this.stattrak  ? e.STAT_TRAK[numToSkinFloat(e.float)].steamLink
+                                     : e[numToSkinFloat(e.float)].steamLink,
             });
         })
 
         let result = {
             inputs: trimmedInputs,
             outputs: trimmedOutputs,
-            avrgFloat:this.outcome.avrgFloat,
+            avrgFloat: this.outcome.avrgFloat,
             inputsCost: this.outcome.inputsCost + '$',
             outputsCost: this.outcome.outputsCost + '$',
             profit: this.outcome.profit,
             rarity: this.rarity,
+            stattrak: this.stattrak,
         };
 
         if(args.includes('--spy')) console.log("[#] Tradeupspy.com Link generating...".green);
         let tradespyLink = args.includes('--spy')
-                         ? await generateTradespyLink(this.inputs, this.outcome.outputs)
+                         ? await generateTradespyLink(this.inputs, this.outcome.outputs, this.stattrak)
                          : undefined;
         if(tradespyLink) {
             result.tradespyLink = tradespyLink;
@@ -446,7 +463,18 @@ class Agent {
         for(let input of this.inputs){
             let rarity = input.rarity;
             let source = input.source;
-            let outs = await Skin.find({ source, rarity: numberToRarity(rarityToNumber(rarity) + 1) }).lean();
+            let query = { 
+                source, 
+                rarity: numberToRarity(rarityToNumber(rarity) + 1),
+            }
+            if(this.stattrak) query.$or = [
+                { 'STAT_TRAK.FN.stashVal': { $gte: 0 } },
+                { 'STAT_TRAK.MW.stashVal': { $gte: 0 } },
+                { 'STAT_TRAK.FT.stashVal': { $gte: 0 } },
+                { 'STAT_TRAK.WW.stashVal': { $gte: 0 } },
+                { 'STAT_TRAK.BS.stashVal': { $gte: 0 } }
+            ]
+            let outs = await Skin.find(query).lean();
             outputs.push(...outs);
         }
         // remove dublicates
@@ -456,11 +484,11 @@ class Agent {
         outputs = await this.updatePrices(outputs);
 
         // override values from a file
-        outputs = await this.override(outputs, true);
+        outputs = await this.override(outputs);
 
         // sort all skins by case/collection and count them
         let sourceSorted = differentiateBy('source', this.inputs, outputs);
-        
+    
         // calculate the skins denominator
         let denominator = 0;
         for(let source in sourceSorted){
@@ -484,10 +512,13 @@ class Agent {
         // calculate profit
         let inputsCost = 0;
         for(let input of this.inputs){
-            let currentInputCost = input[numToSkinFloat(input.float)];
+            let currentInputCost = this.stattrak ? input.STAT_TRAK[numToSkinFloat(input.float)]
+                                                 : input[numToSkinFloat(input.float)];
             if(currentInputCost.stashVal == -1){ // No Recent Price for current float
-                let left = input[getNextSkinFloat(input.float,-1)] || {};
-                let right = input[getNextSkinFloat(input.float,1)] || {};
+                let left = this.stattrak  ? (input.STAT_TRAK[getNextSkinFloat(input.float, -1)] || {})
+                                          : (input[getNextSkinFloat(input.float, -1)] || {});
+                let right = this.stattrak ? (input.STAT_TRAK[getNextSkinFloat(input.float, 1)] || {})
+                                          : (input[getNextSkinFloat(input.float, 1)] || {});
                 currentInputCost = left.stashVal > right.stashVal ? left : right;
             }
             input.price = currentInputCost.stashVal;
@@ -496,7 +527,10 @@ class Agent {
     
         let expectedValue = 0;
         for(let output of outputs){
-            output.price = Math.max(output[numToSkinFloat(output.float)].stashVal,0);
+            output.price = Math.max(
+                this.stattrak ? output.STAT_TRAK[numToSkinFloat(output.float)].stashVal
+                              : output[numToSkinFloat(output.float)].stashVal
+                ,0);
             expectedValue += output.price * output.chance / 100;
         }
 

@@ -54,8 +54,8 @@ function getIdsUrl(skins){
     return url.substr(0, url.length - 1);
 }
 
-async function generateTradespyLink(inputs, outputs){
-    let baseUrl = "https://www.tradeupspy.com/calculator/share/undefined/false/5";
+async function generateTradespyLink(inputs, outputs, stattrak=false){
+    let baseUrl = `https://www.tradeupspy.com/calculator/share/undefined/${stattrak}/5`;
     
     // float of the inputs
     let floatsUrl = "/";
