@@ -1,3 +1,3 @@
-- Support stattrak AAAAAAAAAAAAND overide stattrak prices AAAAND generate spy link with stattrak
+- overide stattrak prices 
 - Create a spike detection based on the csgostash extra info while scraping the database
 - Only generate floats that can be found on the market (ex --sensitive)

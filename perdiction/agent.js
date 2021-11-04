@@ -417,7 +417,7 @@ class Agent {
     async updatePrices(skins){
         if(!args.includes('--smart')) return skins;
 
-        for(let i = 0; i < skins.length; i++) {
+        await Promise.all(skins.map(async (_el, i, skins) => {
             let url = `https://csgostash.com/skin/${skins[i].CSGO_STASH_ID}/${skins[i].CSGO_STASH_NAME}`;
             let scrape = await advancedGunScrape(url);
 
@@ -449,7 +449,7 @@ class Agent {
                 WW: { ...skins[i].WW },
                 BS: { ...skins[i].BS },
             }, { new: true });
-        }
+        }));
 
         return skins;
     }

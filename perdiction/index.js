@@ -150,9 +150,11 @@ function handleParams(){
         })
     }
 
-    if(args.includes('--allowStattrak') || args.includes('--onlyStattrak')){
-        cmdWarn(`Industrial and Consumer grade skins cannot be used in a stattrak trade up.`);
-    }
+    if(args.includes('--allowStattrak') || args.includes('--onlyStattrak'))
+    cmdWarn(`Industrial and Consumer grade skins cannot be used in a stattrak trade up.`);
+
+    if(args.includes('--smart') && !args.includes('--eval'))
+    cmdError(`'--smart' can only be used with '--eval'. Use '--help' for more info.`)
 
     if(args.includes('--smart')) 
     cmdWarn(`'--smart' is used. This affects the speed of the program.`);

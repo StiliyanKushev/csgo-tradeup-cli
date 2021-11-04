@@ -1,5 +1,6 @@
 const playwright = require('playwright');
 const Spy = require('./models/spy');
+const { chunk, ArrayFromChunks } = require('./prototypes/array');
 
 async function genIdsSpy(skins){
     const browser = await playwright.chromium.launch({
@@ -16,47 +17,60 @@ async function genIdsSpy(skins){
             '--disable-site-isolation-trials',
         ]
     });
+
+    // split the skins into chunks
+    let chunks = chunk(10, skins);
+
+    await Promise.all(chunks.map(async chunk => {
+        // create new browser window
+        const context = await browser.newContext();
+
+        // create new tab for each skin
+        await Promise.all(chunk.map(async skin => {
+            let id = 0;
     
-    const page = await browser.newPage();
-    await page.goto("https://www.tradeupspy.com/skins/");
+            // check the database for already fetched IDs
+            let spyDoc = await Spy.findOne({ name: skin.name });
+    
+            // if found use that
+            if(spyDoc) id = spyDoc.CSGO_SPY_ID;
+            // otherwise scrape and generate new one
+            else {
+                const page = await context.newPage();
+                await page.goto("https://www.tradeupspy.com/skins/");
+                await page.exposeFunction('waitForSelector', async (cssSelector) => {
+                    await await page.waitForSelector(cssSelector);
+                });
+                id = await page.evaluate(async (inputName) => {
+                    // trigger gun search
+                    let input = document.getElementById("input_search_skin");
+                    input.value = inputName;
+                    input.dispatchEvent(new Event('keyup'));
+    
+                    // wait for gun to be found
+                    await window.waitForSelector(".searched_skins_container_enabled>a");
+    
+                    // extract the gun id
+                    let gun = document.getElementsByClassName("searched_skins_container_enabled")[0];
+                    let skinUrl = gun.children[0].href.split('/');
+                    let id = skinUrl[skinUrl.length - 2];
+                    return id;
+                }, skin.name);
+    
+                // close page
+                page.close();
+    
+                // push the new skin spy id to the database
+                await new Spy({ name: skin.name , CSGO_SPY_ID: id }).save();
+            }
+    
+            // set the skin spyId at the end
+            skin.spyId = id;
+        }));
+    }));
 
-    await page.exposeFunction('waitForSelector', async (cssSelector) => {
-        await await page.waitForSelector(cssSelector);
-    });
-
-    for(let skin of skins){
-        let id = 0;
-
-        // check the database for already fetched IDs
-        let spyDoc = await Spy.findOne({ name: skin.name });
-
-        // if found use that
-        if(spyDoc) id = spyDoc.CSGO_SPY_ID;
-        // otherwise scrape and generate new one
-        else {
-            id = await page.evaluate(async (inputName) => {
-                // trigger gun search
-                let input = document.getElementById("input_search_skin");
-                input.value = inputName;
-                input.dispatchEvent(new Event('keyup'));
-
-                // wait for gun to be found
-                await window.waitForSelector(".searched_skins_container_enabled>a");
-
-                // extract the gun id
-                let gun = document.getElementsByClassName("searched_skins_container_enabled")[0];
-                let skinUrl = gun.children[0].href.split('/');
-                let id = skinUrl[skinUrl.length - 2];
-                return id;
-            }, skin.name);
-
-            // push the new skin spy id to the database
-            await new Spy({ name: skin.name , CSGO_SPY_ID: id }).save();
-        }
-
-        // set the skin spyId at the end
-        skin.spyId = id;
-    }
+    // covert chunks back to one array
+    skins = ArrayFromChunks(chunks);
 
     browser.close();
     return skins;
