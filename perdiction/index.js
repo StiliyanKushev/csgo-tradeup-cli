@@ -1,9 +1,8 @@
 const fs = require('fs');
 const cloneDeep = require('lodash.clonedeep');
-const { cmdExit, cmdError } = require('../cmd');
+const { cmdExit, cmdError, cmdWarn } = require('../cmd');
 const Skin = require('../models/skin');
-const Source = require('../models/source');
-const { randomArr } = require('../utils/general');
+const { randomArr, randomArb } = require('../utils/general');
 const { getArgsVal } = require('../cmd');
 const { numberToRarity, rarityToNumber, RARITIES } = require('../utils/rarity');
 const Agent = require('./agent');
@@ -12,26 +11,37 @@ const { checkEmptyDB } = require('../db');
 let args = process.argv.slice(2);
 
 async function main(){
+    handleParams();
     await checkEmptyDB();
-    handleWrongParams();
-
-    if(args.includes('--smart')) 
-    console.log(`NOTE: '--smart' is used. This affects the speed of the program.`.bgBlack.yellow);
-
     await handleEval();
     await handleGeneticAlgoritm();
 }
 
 async function handleGeneticAlgoritm(){
+    // function to get a random stattrak rarity from all rarities
+    const getStatTrakFromRarities = (rarities) => {
+        for(let i = rarities.length; i >= 0; i--)
+            if(!RARITIES.ALL_INPUTS_STAT_TRAK.includes(rarities[i])) rarities.splice(i, 1);
+        return numberToRarity(rarityToNumber(randomArr(rarities, 1)));
+    }
+
     // get the rarities we're working with
     let parsedRars = getArgsVal('--rarity', 'string');
     let rarities = parsedRars ? parsedRars.split(',') : RARITIES.ALL_INPUTS;
-    
+
     // prepare agents
     let populs = [];
     for(let i = 0; i < (getArgsVal('--populs', 'number') || 20); i++){
-        let rarity = numberToRarity(rarityToNumber(randomArr(rarities, 1)));
-        populs.push(await new Population(getArgsVal('--popSize', 'number') || 20, rarity).init());
+        let stattrak = isStattrak();
+        let rarity = !stattrak ? numberToRarity(rarityToNumber(randomArr(rarities, 1)))
+                               : getStatTrakFromRarities(rarities);
+        populs.push(
+            await new Population(
+                getArgsVal('--popSize', 'number') || 20,
+                rarity,
+                stattrak
+            ).init()
+        );
     }
 
     // run agents
@@ -40,8 +50,15 @@ async function handleGeneticAlgoritm(){
 
     // function to reset the finished population
     const reset = async () => {
-        let rarity = numberToRarity(rarityToNumber(randomArr(rarities, 1)));
-        populs[bestPopulIndex] = await new Population(getArgsVal('--popSize', 'number') || 20, rarity).init();
+        let stattrak = isStattrak();
+        let rarity = !stattrak ? numberToRarity(rarityToNumber(randomArr(rarities, 1)))
+                               : getStatTrakFromRarities(rarities);
+        populs[bestPopulIndex] = 
+        await new Population(
+            getArgsVal('--popSize', 'number') || 20,
+            rarity,
+            stattrak
+        ).init();
     }
 
     // main loop
@@ -60,7 +77,7 @@ async function handleGeneticAlgoritm(){
         console.log(`max profit = ${bestAgent.outcome.profit}`);
 
         // end condition
-        if (bestAgent.outcome.profit > (getArgsVal('--profit', 'number') || args.includes('--noLoss') ? 100:110)){
+        if (bestAgent.outcome.profit > (getArgsVal('--profit', 'number') || (args.includes('--noLoss') ? 100:110))){
             if(args.includes('--noLoss') && bestAgent.hasLoss()) { await reset(); continue; }
 
             // log the best agent before removal
@@ -97,8 +114,8 @@ async function handleEval(){
             })
             
             // run the agent
-            let agent = await new Agent(parsed.rarity).init(inputs);
-            await agent.calcTradeup(true);
+            let agent = await new Agent(parsed.rarity, parsed.stattrak).init(inputs);
+            await agent.calcTradeup();
             await agent.log(filename);
         }
 
@@ -115,7 +132,7 @@ async function handleEval(){
     }
 }
 
-function handleWrongParams(){
+function handleParams(){
     if(args.includes('--exclude') && args.includes('----include'))
     cmdError(`You can't use both --exclude and --include together.`);
 
@@ -132,6 +149,24 @@ function handleWrongParams(){
             cmdError(`You can't have '${r}' (--rarity ${r}) as a valid rarity. Use '--help' for more info.`);
         })
     }
+
+    if(args.includes('--allowStattrak') || args.includes('--onlyStattrak'))
+    cmdWarn(`Industrial and Consumer grade skins cannot be used in a stattrak trade up.`);
+
+    if(args.includes('--smart') && !args.includes('--eval'))
+    cmdError(`'--smart' can only be used with '--eval'. Use '--help' for more info.`)
+
+    if(args.includes('--smart')) 
+    cmdWarn(`'--smart' is used. This affects the speed of the program.`);
+}
+
+function isStattrak(){
+    if(args.includes('--onlyStattrak')) return true;
+    if(args.includes('--allowStattrak')){
+        let randNum = randomArb(0, 1);
+        if(randNum > 0.5) return true;
+    }
+    return false;
 }
 
 function finish(){

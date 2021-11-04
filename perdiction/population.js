@@ -1,12 +1,14 @@
 const Agent = require('./agent');
 const { randomArr, randomArb } = require('../utils/general');
 const cloneDeep = require('lodash.clonedeep');
+let args = process.argv.slice(2);
 
 class Population {
-    constructor(size, rarity){
+    constructor(size, rarity, stattrak){
         this.rarity = rarity;
         this.size = size;
-        this.data = Array.from({ length:size }, () => new Agent(rarity));
+        this.stattrak = stattrak;
+        this.data = Array.from({ length:size }, () => new Agent(rarity, this.stattrak));
         this.bestAgent = { outcome: { profit: Number.MIN_VALUE } };
     }
 

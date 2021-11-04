@@ -3,7 +3,7 @@ const fs = require('fs');
 const Skin = require('./models/skin');
 const Source = require('./models/source');
 const { rarityToNumber, getHighestRarity } = require('./utils/rarity');
-const { getArgsVal, cmdExit } = require('./cmd');
+const { getArgsVal } = require('./cmd');
 
 const scrapeUrl = (url) => {
     return new Promise((resolve, reject) => {
