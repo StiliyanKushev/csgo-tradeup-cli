@@ -46,7 +46,7 @@ const cmdHelp = (print=true) => {
     `--skinMutate        -> Number between 0 and 100. Percent of chance to change a skin during mutation.                                          `.bgCyan.black + '\n' +
     `--floatMutate       -> Number between 0 and 100. Percent of chance to change a skin's float during mutation.                                  `.bgCyan.black + '\n' +
     `--eval              -> Evaluate generated result/s and export more information about the tradeup. (Ex: --eval "./result.json")                `.bgCyan.black + '\n' +
-    `--smart             -> Fetch most recent prices of skins when calculating the tradeups.                                                       `.bgCyan.black + '\n' +
+    `--smart             -> Fetch most recent prices of skins when evaluating trade ups using '--eval'                                             `.bgCyan.black + '\n' +
     `--noLoss            -> Only save tradeups that have no chance of money loss. (May give less frequent results)                                 `.bgCyan.black + '\n' +
     `--onlyCases         -> Don't include skins found in collections.                                                                              `.bgCyan.black + '\n' +
     `--onlyCollections   -> Don't include skins found in cases.                                                                                    `.bgCyan.black + '\n' +
