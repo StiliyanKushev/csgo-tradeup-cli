@@ -12,7 +12,6 @@ function differentiateBy(countBy, ...arrays){
             else sorted[skin[countBy]][`num${i}`] += 1;
         }
     }
-
     return sorted;
 }
 

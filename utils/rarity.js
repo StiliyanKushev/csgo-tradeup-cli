@@ -5,6 +5,7 @@ const RARITIES = {
     Restricted: "Restricted",
     Classified: "Classified",
     Covert: "Covert",
+    ALL_INPUTS_STAT_TRAK: [ "Mil-Spec", "Restricted", "Classified" ],
     ALL_INPUTS: [ "Consumer", "Industrial", "Mil-Spec", "Restricted", "Classified" ],
     ALL: [ "Consumer", "Industrial", "Mil-Spec", "Restricted", "Classified", "Covert" ]
 }

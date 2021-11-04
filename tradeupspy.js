@@ -1,11 +1,25 @@
-const puppeteer = require('puppeteer');
+const playwright = require('playwright');
 const Spy = require('./models/spy');
 
 async function genIdsSpy(skins){
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();  
-    await page.goto("https://www.tradeupspy.com/skins/");
+    const browser = await playwright.chromium.launch({
+        headless: true, 
+        args: [
+            '--disable-gpu',
+            '--disable-dev-shm-usage',
+            '--disable-setuid-sandbox',
+            '--no-first-run',
+            '--no-sandbox',
+            '--no-zygote',
+            '--deterministic-fetch',
+            '--disable-features=IsolateOrigins',
+            '--disable-site-isolation-trials',
+        ]
+    });
     
+    const page = await browser.newPage();
+    await page.goto("https://www.tradeupspy.com/skins/");
+
     await page.exposeFunction('waitForSelector', async (cssSelector) => {
         await await page.waitForSelector(cssSelector);
     });
@@ -54,8 +68,8 @@ function getIdsUrl(skins){
     return url.substr(0, url.length - 1);
 }
 
-async function generateTradespyLink(inputs, outputs){
-    let baseUrl = "https://www.tradeupspy.com/calculator/share/undefined/false/5";
+async function generateTradespyLink(inputs, outputs, stattrak=false){
+    let baseUrl = `https://www.tradeupspy.com/calculator/share/undefined/${stattrak}/5`;
     
     // float of the inputs
     let floatsUrl = "/";

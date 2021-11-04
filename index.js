@@ -10,7 +10,6 @@ init(async (db) => {
     if(args.includes('--help')){
         cmdHelp();
         cmdExit();
-        return;
     }
 
     if(args.includes('--cd') || args.includes('--bd')){
