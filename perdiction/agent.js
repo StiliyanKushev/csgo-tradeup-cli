@@ -31,8 +31,7 @@ class Agent {
 
     async init(inputs=[]){
         if(inputs.length > 0){
-            this.inputs = inputs;
-            await this.override();
+            this.inputs = await this.override(inputs);
         }
         else {
             let maxVal = getArgsVal('--maxVal', 'number') || Number.MAX_SAFE_INTEGER;
@@ -162,10 +161,12 @@ class Agent {
 
             let toCheck = data.length != undefined ? [...data] : [data];
             for await (const line of rl) {
-                let [name, condition, price] = line.split('#');
+                let [name, condition, price, isStattrak] = line.split('#');
                 for(let i = toCheck.length - 1; i >= 0; i--){
                     if(toCheck[i].name == name){
-                        data[i][condition].stashVal = Number(price);
+                        isStattrak == "ST"
+                                    ? data[i].STAT_TRAK[condition].stashVal = Number(price)
+                                    : data[i][condition].stashVal = Number(price);
                     }
                 }
             }

@@ -10,18 +10,14 @@ init(async (db) => {
     checkFolders();
     cmdCheckArgs();
 
-    if(args.includes('--help')){
-        cmdHelp();
-        cmdExit();
-    }
+    if(args.includes('--help'))
+    cmdHelp();
 
-    if(args.includes('--cd') || args.includes('--bd')){
-        await clearDatabase();
-    }
+    if(args.includes('--cd') || args.includes('--bd'))
+    await clearDatabase();
 
-    if(args.includes('--bd')){
-        await buildDatabase();
-    }
+    if(args.includes('--bd'))
+    await buildDatabase();
 
     await main();
 

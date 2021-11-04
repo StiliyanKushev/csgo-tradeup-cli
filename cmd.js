@@ -56,7 +56,10 @@ const cmdHelp = (print=true) => {
     `--override          -> Used to override prices of skins. (each new line) (Ex: --override './file.txt') (Format: 'name#condition#price')       `.bgCyan.black + '\n' +
     `--spy               -> Generate a tradeupspy link for successful tradeup or when using --eval.                                                `.bgCyan.black;
     
-    if(print) console.log(helpMsg);
+    if(print) { 
+        console.log(helpMsg);
+        cmdExit();
+    }
     return helpMsg;
 }
 
