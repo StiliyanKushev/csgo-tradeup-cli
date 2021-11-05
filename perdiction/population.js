@@ -56,19 +56,19 @@ class Population {
     async selection(pool){
         const crossover = async function(_, index, data){
             let [ parentA, parentB ] = randomArr(pool, 2);
-            data[index] = await this.crossover(parentA, parentB).mutate();
+            data[index] = await (await this.crossover(parentA, parentB)).mutate();
         }
         await Promise.all(this.data.map(await crossover.bind(this)))
     }
 
-    crossover(parentA, parentB){
+    async crossover(parentA, parentB){
         let child = new Agent(this.rarity);
         let midPoint = Math.floor(randomArb(0, 10));
         let parentA_DNA = randomArr(parentA.inputs, midPoint);
         let parentB_DNA = randomArr(parentB.inputs, 10 - midPoint);
         parentA_DNA = Array.isArray(parentA_DNA) ? parentA_DNA : [parentA_DNA];
         parentB_DNA = Array.isArray(parentB_DNA) ? parentB_DNA : [parentB_DNA];
-        child.inputs = [...parentA_DNA,...parentB_DNA];
+        await child.init([...parentA_DNA,...parentB_DNA]);
         return child;
     }
 }

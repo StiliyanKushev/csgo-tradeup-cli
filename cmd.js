@@ -95,7 +95,6 @@ function getArgsVal(arg, type){
     if(args.indexOf(arg) == -1) return undefined;
     if(val == undefined || val.startsWith('-')) 
     cmdError(`Argument '${arg}' expects a value. Use --help for more info.`);
-    //if(val.startsWith('-')) return undefined;
 
     const typeOf = (v) => {
         if(v.toLowerCase() == 'true' || v.toLowerCase() == 'false') return 'boolean';
