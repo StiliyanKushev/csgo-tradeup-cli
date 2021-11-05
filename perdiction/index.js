@@ -1,18 +1,15 @@
 const fs = require('fs');
 const cloneDeep = require('lodash.clonedeep');
-const { cmdExit, cmdError, cmdWarn } = require('../cmd');
+const { cmdExit } = require('../cmd');
 const Skin = require('../models/skin');
 const { randomArr, randomArb } = require('../utils/general');
 const { getArgsVal } = require('../cmd');
 const { numberToRarity, rarityToNumber, RARITIES } = require('../utils/rarity');
 const Agent = require('./agent');
 const Population = require('./population');
-const { checkEmptyDB } = require('../db');
 let args = process.argv.slice(2);
 
 async function main(){
-    checkParams();
-    await checkEmptyDB();
     await handleEval();
     await handleGeneticAlgoritm();
 }
@@ -134,51 +131,11 @@ async function handleEval(){
     }
 }
 
-function checkParams(){
-    if(args.includes('--exclude') && args.includes('----include'))
-    cmdError(`You can't use both --exclude and --include together.`);
-
-    if(args.includes('--noLoss') && getArgsVal('--profit', 'number') < 100)
-    cmdError(`You can't have a '--profit' value of less then 100 when using '--noLoss.'`);
-
-    if(args.includes('--onlyCases') && args.includes('--onlyCollections'))
-    cmdError(`You can't use both '--onlyCases' and '--onlyCollections'`);
-
-    if(args.includes('--rarity')){
-        RARITIES.ALL_INPUTS.includes()
-        getArgsVal('--rarity', 'string').split(',').map(r => {
-            if(!RARITIES.ALL_INPUTS.includes(r))
-            cmdError(`You can't have '${r}' (--rarity ${r}) as a valid rarity. Use '--help' for more info.`);
-        })
-    }
-
-    if(args.includes('--onlyCases'))
-    cmdWarn(`Rarities 'Consumer' and 'Industrial' will be skipped because of '--onlyCases'`);
-
-    if(args.includes('--allowStattrak') && args.includes('--onlyStattrak'))
-    cmdWarn(`There's no need to use both '--allowStattrak' and '--onlyStattrak'`);
-
-    if(args.includes('--onlyCollections') && args.includes('--onlyStattrak'))
-    cmdError(`You can't use both '--onlyCollections' and '--onlyStattrak'.`);
-
-    if(args.includes('--onlyCollections') && args.includes('--allowStattrak'))
-    cmdWarn(`'--onlyCollections' will be skipped for any stattrak tradeups.`);
-
-    if(args.includes('--allowStattrak') || args.includes('--onlyStattrak'))
-    cmdWarn(`Industrial and Consumer grade skins cannot be used in a stattrak trade up.`);
-
-    if(args.includes('--smart') && !args.includes('--eval'))
-    cmdError(`'--smart' can only be used with '--eval'. Use '--help' for more info.`)
-
-    if(args.includes('--smart')) 
-    cmdWarn(`'--smart' is used. This affects the speed of the program.`);
-}
-
 function isStattrak(){
     if(args.includes('--onlyStattrak')) return true;
     if(args.includes('--allowStattrak')){
         let randNum = randomArb(0, 1);
-        if(randNum > 0.5) return true;
+        if(randNum > ((getArgsVal('--stattrakChance', 'number') / 100) || 0.05)) return true;
     }
     return false;
 }
