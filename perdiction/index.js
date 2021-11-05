@@ -63,6 +63,9 @@ async function handleGeneticAlgoritm(){
     // main loop
     while(true){
         let bestAgent = { outcome: { profit: Number.MIN_VALUE } };
+
+        // todo optimize this using workerpool
+        let initialTime = Date.now()
         for(let i = 0; i < populs.length; i++){
             let population = populs[i];
             await population.cycle();
@@ -71,6 +74,8 @@ async function handleGeneticAlgoritm(){
                 bestPopulIndex = i;
             }
         }
+        // console.log((Date.now() - initialTime) / 1000)
+        // cmdExit();
 
         // print current best result
         console.log(`max profit = ${bestAgent.outcome.profit}`);

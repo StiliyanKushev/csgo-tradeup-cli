@@ -93,8 +93,9 @@ function getArgsVal(arg, type){
     let val = args[args.indexOf(arg) + 1];
 
     if(args.indexOf(arg) == -1) return undefined;
-    if(val == undefined) cmdError(`Argument '${arg}' expects a value. Use --help for more info.`);
-    if(val.startsWith('-')) return undefined;
+    if(val == undefined || val.startsWith('-')) 
+    cmdError(`Argument '${arg}' expects a value. Use --help for more info.`);
+    //if(val.startsWith('-')) return undefined;
 
     const typeOf = (v) => {
         if(v.toLowerCase() == 'true' || v.toLowerCase() == 'false') return 'boolean';
