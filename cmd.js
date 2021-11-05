@@ -23,40 +23,43 @@ const cmdClear = (fullClear=false) => {
 
 const cmdHelp = (print=true) => {
     let helpMsg =
-    `All Parameters:                                                                                                                               `.bgBlack.cyan + '\n' +
-    `--help              -> Shows this help menu.                                                                                                  `.bgCyan.black + '\n' + 
-    `--f                 -> Forces any action that otherwise prompts a timer.                                                                      `.bgCyan.black + '\n' +
-    `--cd                -> Clears the gun database.                                                                                               `.bgCyan.black + '\n' +
-    `--bd                -> Rebuilds the gun database.                                                                                             `.bgCyan.black + '\n' +
-    `--sdb               -> Saves scraped data to a json file.                                                                                     `.bgCyan.black + '\n' +
-    `--json              -> Use json file as scraped data. (Ex: --json "./data.json")                                                              `.bgCyan.black + '\n' +
-    `--results           -> Give maximum number of results before stopping. (Ex: --results 10)                                                     `.bgCyan.black + '\n' +
-    `--sources           -> Give maximum number of sources per each tradeup. (Ex: --sources 2)                                                     `.bgCyan.black + '\n' +
-    `--rarity            -> Pick the rarity to use for inputs. (Ex: --rarity "Mil-Spec")                                                           `.bgCyan.black + '\n' +
-    `--allowStattrak     -> Include stattrak trade ups.                                                                                            `.bgCyan.black + '\n' +
-    `--onlyStattrak      -> Include ONLY stattrak trade ups.                                                                                       `.bgCyan.black + '\n' +
-    `--profit            -> When to save a tradeup as profitable. (Ex: --profit 115)                                                               `.bgCyan.black + '\n' +
-    `--minVal            -> Minimum input skin value when generating an input skin. (Ex: --maxVal 1)                                               `.bgCyan.black + '\n' +
-    `--maxVal            -> Maximum input skin value when generating an input skin. (Ex: --maxVal 2)                                               `.bgCyan.black + '\n' +
-    `--priceMargin       -> Used when looking for a replacement skin. More = more risky tradeups. (Ex: --priceMargin 5)                            `.bgCyan.black + '\n' +
-    `--avf               -> Include the average float in the fitness calculation. (May give less frequent results)                                 `.bgCyan.black + '\n' +
-    `--noFee             -> Remove the steam fee when calculating the profits.                                                                     `.bgCyan.black + '\n' +
-    `--populs            -> Number of populations that will try to constructs a tradeup. (Ex: --populs 20)                                         `.bgCyan.black + '\n' +
-    `--popSize           -> Number of agents to work on each tradeup simulation. (Ex: --popSize 20)                                                `.bgCyan.black + '\n' +
-    `--skinMutate        -> Number between 0 and 100. Percent of chance to change a skin during mutation.                                          `.bgCyan.black + '\n' +
-    `--floatMutate       -> Number between 0 and 100. Percent of chance to change a skin's float during mutation.                                  `.bgCyan.black + '\n' +
-    `--eval              -> Evaluate generated result/s and export more information about the tradeup. (Ex: --eval "./result.json")                `.bgCyan.black + '\n' +
-    `--smart             -> Fetch most recent prices of skins when evaluating trade ups using '--eval'                                             `.bgCyan.black + '\n' +
-    `--noLoss            -> Only save tradeups that have no chance of money loss. (May give less frequent results)                                 `.bgCyan.black + '\n' +
-    `--onlyCases         -> Don't include skins found in collections.                                                                              `.bgCyan.black + '\n' +
-    `--onlyCollections   -> Don't include skins found in cases.                                                                                    `.bgCyan.black + '\n' +
-    `--noSave            -> Don't generate json files and only show terminal logs.                                                                 `.bgCyan.black + '\n' +
-    `--exclude           -> Exclude all cases/collections in a given file. (each new line) (Ex: --exclude './file.txt')                            `.bgCyan.black + '\n' +
-    `--include           -> Include only cases/collections in a given file. (each new line) (Ex: --include './file.txt')                           `.bgCyan.black + '\n' +
-    `--override          -> Used to override prices of skins. (each new line) (Ex: --override './file.txt') (Format: 'name#condition#price')       `.bgCyan.black + '\n' +
-    `--spy               -> Generate a tradeupspy link for successful tradeup or when using --eval.                                                `.bgCyan.black;
+    `All Parameters:`                                                                                                                               + '\n' +
+    `--help              -> Shows this help menu.`                                                                                                  + '\n' + 
+    `--f                 -> Forces any action that otherwise prompts a timer.`                                                                      + '\n' +
+    `--cd                -> Clears the gun database.`                                                                                               + '\n' +
+    `--bd                -> Rebuilds the gun database.`                                                                                             + '\n' +
+    `--sdb               -> Saves scraped data to a json file.`                                                                                     + '\n' +
+    `--json              -> Use json file as scraped data. (Ex: --json "./data.json")`                                                              + '\n' +
+    `--results           -> Give maximum number of results before stopping. (Ex: --results 10)`                                                     + '\n' +
+    `--sources           -> Give maximum number of sources per each tradeup. (Ex: --sources 2)`                                                     + '\n' +
+    `--rarity            -> Pick the rarity to use for inputs. (Ex: --rarity "Mil-Spec")`                                                           + '\n' +
+    `--allowStattrak     -> Include stattrak trade ups.`                                                                                            + '\n' +
+    `--onlyStattrak      -> Include ONLY stattrak trade ups.`                                                                                       + '\n' +
+    `--profit            -> When to save a tradeup as profitable. (Ex: --profit 115)`                                                               + '\n' +
+    `--minVal            -> Minimum input skin value when generating an input skin. (Ex: --maxVal 1)`                                               + '\n' +
+    `--maxVal            -> Maximum input skin value when generating an input skin. (Ex: --maxVal 2)`                                               + '\n' +
+    `--priceMargin       -> Used when looking for a replacement skin. More = more risky tradeups. (Ex: --priceMargin 5)`                            + '\n' +
+    `--avf               -> Include the average float in the fitness calculation. (May give less frequent results)`                                 + '\n' +
+    `--noFee             -> Remove the steam fee when calculating the profits.`                                                                     + '\n' +
+    `--populs            -> Number of populations that will try to constructs a tradeup. (Ex: --populs 20)`                                         + '\n' +
+    `--popSize           -> Number of agents to work on each tradeup simulation. (Ex: --popSize 20)`                                                + '\n' +
+    `--skinMutate        -> Number between 0 and 100. Percent of chance to change a skin during mutation.`                                          + '\n' +
+    `--floatMutate       -> Number between 0 and 100. Percent of chance to change a skin's float during mutation.`                                  + '\n' +
+    `--eval              -> Evaluate generated result/s and export more information about the tradeup. (Ex: --eval "./result.json")`                + '\n' +
+    `--smart             -> Fetch most recent prices of skins when evaluating trade ups using '--eval'`                                             + '\n' +
+    `--noLoss            -> Only save tradeups that have no chance of money loss. (May give less frequent results)`                                 + '\n' +
+    `--onlyCases         -> Don't include skins found in collections.`                                                                              + '\n' +
+    `--onlyCollections   -> Don't include skins found in cases.`                                                                                    + '\n' +
+    `--noSave            -> Don't generate json files and only show terminal logs.`                                                                 + '\n' +
+    `--exclude           -> Exclude all cases/collections in a given file. (each new line) (Ex: --exclude './file.txt')`                            + '\n' +
+    `--include           -> Include only cases/collections in a given file. (each new line) (Ex: --include './file.txt')`                           + '\n' +
+    `--override          -> Override prices of skins. (each new line) (Ex: --override './file.txt') (Format: 'name#condition#price#st')`            + '\n' +
+    `--spy               -> Generate a tradeupspy link for successful tradeup or when using --eval.`;
     
-    if(print) console.log(helpMsg);
+    if(print) { 
+        console.log(helpMsg);
+        cmdExit();
+    }
     return helpMsg;
 }
 
