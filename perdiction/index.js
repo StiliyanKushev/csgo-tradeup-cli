@@ -11,17 +11,21 @@ const { checkEmptyDB } = require('../db');
 let args = process.argv.slice(2);
 
 async function main(){
-    handleParams();
+    checkParams();
     await checkEmptyDB();
     await handleEval();
     await handleGeneticAlgoritm();
 }
 
 async function handleGeneticAlgoritm(){
-    // function to get a random stattrak rarity from all rarities
-    const getStatTrakFromRarities = (rarities) => {
-        for(let i = rarities.length; i >= 0; i--)
-            if(!RARITIES.ALL_INPUTS_STAT_TRAK.includes(rarities[i])) rarities.splice(i, 1);
+    // function to get a random valid rarity based on arguments
+    const getValidRarity = (rarities, stattrak=false) => {
+        // discard stattrak unusable rarities, discard case unusable rarities
+        if(stattrak || args.includes('--onlyCases'))
+            for(let i = rarities.length; i >= 0; i--)
+                if(!RARITIES.ALL_INPUTS_STAT_TRAK.includes(rarities[i])) rarities.splice(i, 1);
+                
+        // at the end return what's left
         return numberToRarity(rarityToNumber(randomArr(rarities, 1)));
     }
 
@@ -33,8 +37,7 @@ async function handleGeneticAlgoritm(){
     let populs = [];
     for(let i = 0; i < (getArgsVal('--populs', 'number') || 20); i++){
         let stattrak = isStattrak();
-        let rarity = !stattrak ? numberToRarity(rarityToNumber(randomArr(rarities, 1)))
-                               : getStatTrakFromRarities(rarities);
+        let rarity = getValidRarity(rarities, stattrak);
         populs.push(
             await new Population(
                 getArgsVal('--popSize', 'number') || 20,
@@ -51,9 +54,8 @@ async function handleGeneticAlgoritm(){
     // function to reset the finished population
     const reset = async () => {
         let stattrak = isStattrak();
-        let rarity = !stattrak ? numberToRarity(rarityToNumber(randomArr(rarities, 1)))
-                               : getStatTrakFromRarities(rarities);
-        populs[bestPopulIndex] = 
+        let rarity = getValidRarity(rarities);
+        populs[bestPopulIndex] =
         await new Population(
             getArgsVal('--popSize', 'number') || 20,
             rarity,
@@ -132,7 +134,7 @@ async function handleEval(){
     }
 }
 
-function handleParams(){
+function checkParams(){
     if(args.includes('--exclude') && args.includes('----include'))
     cmdError(`You can't use both --exclude and --include together.`);
 
@@ -149,6 +151,18 @@ function handleParams(){
             cmdError(`You can't have '${r}' (--rarity ${r}) as a valid rarity. Use '--help' for more info.`);
         })
     }
+
+    if(args.includes('--onlyCases'))
+    cmdWarn(`Rarities 'Consumer' and 'Industrial' will be skipped because of '--onlyCases'`);
+
+    if(args.includes('--allowStattrak') && args.includes('--onlyStattrak'))
+    cmdWarn(`There's no need to use both '--allowStattrak' and '--onlyStattrak'`);
+
+    if(args.includes('--onlyCollections') && args.includes('--onlyStattrak'))
+    cmdError(`You can't use both '--onlyCollections' and '--onlyStattrak'.`);
+
+    if(args.includes('--onlyCollections') && args.includes('--allowStattrak'))
+    cmdWarn(`'--onlyCollections' will be skipped for any stattrak tradeups.`);
 
     if(args.includes('--allowStattrak') || args.includes('--onlyStattrak'))
     cmdWarn(`Industrial and Consumer grade skins cannot be used in a stattrak trade up.`);

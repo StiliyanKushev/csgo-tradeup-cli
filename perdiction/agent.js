@@ -245,14 +245,15 @@ class Agent {
             });
         }
 
-        if(args.includes('--onlyCases')){
+        // there are not stattrak skins in collections
+        if(this.stattrak || args.includes('--onlyCases')){
             query.$and.push({
-                source: { $regex: 'Case' }
+                source: { $regex: 'Case', $options: 'igm' }
             });
         }
         else if(args.includes('--onlyCollections')){
             query.$and.push({
-                source: { $regex: 'Collection' }
+                source: { $regex: '^((?!Case).)*$', $options: 'igm' }
             });
         }
 
