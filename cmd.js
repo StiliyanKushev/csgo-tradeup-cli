@@ -33,6 +33,7 @@ const cmdHelp = (print=true) => {
     `--results           -> Give maximum number of results before stopping. (Ex: --results 10)`                                                     + '\n' +
     `--sources           -> Give maximum number of sources per each tradeup. (Ex: --sources 2)`                                                     + '\n' +
     `--rarity            -> Pick the rarity to use for inputs. (Ex: --rarity "Mil-Spec")`                                                           + '\n' +
+    `--stattrakChance    -> Number between 0 and 100. Percent of chance for a tradeup to be a stattrak one or not.`                                 + '\n' +
     `--allowStattrak     -> Include stattrak trade ups.`                                                                                            + '\n' +
     `--onlyStattrak      -> Include ONLY stattrak trade ups.`                                                                                       + '\n' +
     `--profit            -> When to save a tradeup as profitable. (Ex: --profit 115)`                                                               + '\n' +
