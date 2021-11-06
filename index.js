@@ -1,12 +1,13 @@
 const colors = require('colors');
 const { init, buildDatabase, clearDatabase, checkEmptyDB } = require('./db');
-const { cmdHelp, cmdExit, cmdCheckArgs, cmdWarn, cmdError } = require('./cmd');
+const { cmdLog, cmdHelp, cmdExit, cmdCheckArgs, cmdWarn, cmdError } = require('./cmd');
 const main = require('./perdiction');
 const fs = require('fs');
 const path = require('path');
 let args = process.argv.slice(2);
 
-init(async (db) => {
+init(async () => {
+    cmdLog('connection to mongodb established.');
     checkFolders();
     cmdCheckArgs();
     checkParams();

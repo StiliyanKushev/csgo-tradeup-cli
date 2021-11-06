@@ -7,18 +7,20 @@ const Source = require('./models/source');
 let args = process.argv.slice(2);
 mongoose.Promise = global.Promise;
 
+let dbConnection = null;
+const getConnection = () => dbConnection;
+
 function init(onReady) {
     mongoose.connect('mongodb://localhost/csgotradebot', {useNewUrlParser:true, useUnifiedTopology:true});
     mongoose.set('useFindAndModify', false);
-    let db = mongoose.connection;
-    db.once("open", (err) => {
+    dbConnection = mongoose.connection;
+    dbConnection.once("open", (err) => {
         if (err) {
         throw err;
         }
-
-        onReady(db);
+        onReady();
     });
-    db.on("error", (err) => console.log(`Database error: ${err}`));
+    dbConnection.on("error", (err) => console.log(`Database error: ${err}`));
 }
 
 async function buildDatabase(){
@@ -52,6 +54,7 @@ async function clearDatabase(){
 }
 
 module.exports = {
+    getConnection,
     init,
     buildDatabase,
     checkEmptyDB,

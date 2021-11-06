@@ -1,6 +1,7 @@
 const Agent = require('./agent');
 const { randomArr, randomArb } = require('../utils/general');
 const cloneDeep = require('lodash.clonedeep');
+const { cmdLog } = require('../cmd');
 let args = process.argv.slice(2);
 
 class Population {
@@ -12,9 +13,8 @@ class Population {
         this.bestAgent = { outcome: { profit: Number.MIN_VALUE } };
     }
 
-    async init(){
-        await Promise.all(this.data.map(e => e.init()));
-        return this;
+    init(){
+        return Promise.all(this.data.map(e => e.init())).then(() => this);
     }
 
     async cycle(){

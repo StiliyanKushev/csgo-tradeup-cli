@@ -1,6 +1,6 @@
 const fs = require('fs');
 const cloneDeep = require('lodash.clonedeep');
-const { cmdExit } = require('../cmd');
+const { cmdExit, cmdLog, cmdWarn } = require('../cmd');
 const Skin = require('../models/skin');
 const { randomArr, randomArb } = require('../utils/general');
 const { getArgsVal } = require('../cmd');
@@ -31,18 +31,18 @@ async function handleGeneticAlgoritm(){
     let rarities = parsedRars ? parsedRars.split(',') : RARITIES.ALL_INPUTS;
 
     // prepare agents
-    let populs = [];
-    for(let i = 0; i < (getArgsVal('--populs', 'number') || 20); i++){
-        let stattrak = isStattrak();
-        let rarity = getValidRarity(rarities, stattrak);
-        populs.push(
-            await new Population(
-                getArgsVal('--popSize', 'number') || 20,
-                rarity,
-                stattrak
-            ).init()
-        );
-    }
+    cmdLog('populs generation begins.');
+    let populs = new Array((getArgsVal('--populs', 'number') || 20)).fill({});
+    const promises = populs.map(_ => {
+        let stattrak = isStattrak()
+        return new Population(
+            getArgsVal('--popSize', 'number') || 20,
+            getValidRarity(rarities, stattrak),
+            stattrak
+        ).init()
+    })
+    populs = await Promise.all(promises);
+    cmdLog('populs generation ends.', true);
 
     // run agents
     let initial = results = getArgsVal('--results', 'number') || 1;
@@ -64,17 +64,18 @@ async function handleGeneticAlgoritm(){
     while(true){
         let bestAgent = { outcome: { profit: Number.MIN_VALUE } };
 
-        for(let i = 0; i < populs.length; i++){
-            let population = populs[i];
-            await population.cycle();
-            if(population.bestAgent.outcome.profit > bestAgent.outcome.profit) {
-                bestAgent = cloneDeep(population.bestAgent);
-                bestPopulIndex = i;
-            }
-        }
+        cmdLog('genetic selection begins.');
+        await Promise.all(populs.map(async (pop, i, _) => {
+            await pop.cycle();
+            pop.bestAgent.outcome.profit > bestAgent.outcome.profit ?
+            bestPopulIndex = i : null
+        }));
+
+        bestAgent = cloneDeep(populs[bestPopulIndex].bestAgent);
 
         // print current best result
         console.log(`max profit = ${bestAgent.outcome.profit}`);
+        cmdLog('genetic selection ends.', true);
 
         // end condition
         if (bestAgent.outcome.profit > (getArgsVal('--profit', 'number') || (args.includes('--noLoss') ? 100:110))){
@@ -100,6 +101,10 @@ async function handleEval(){
     let evalPath = getArgsVal('--eval', 'path');
     if(evalPath){
         const evalFile = async (path, filename) => {
+            if(!filename.includes('inputs')){
+                cmdWarn(`Skipping ${filename}`);
+                return;
+            }
             // get all inputs from the eval path and convert them to the database docs
             let parsed = JSON.parse(fs.readFileSync(filename ? path + filename : path));
             let inputs = [];

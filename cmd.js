@@ -25,6 +25,7 @@ const cmdHelp = (print=true) => {
     let helpMsg =
     `All Parameters:`                                                                                                                               + '\n' +
     `--help              -> Shows this help menu.`                                                                                                  + '\n' + 
+    `--verbose          -> Shows extra log messages.`                                                                                              + '\n' +
     `--f                 -> Forces any action that otherwise prompts a timer.`                                                                      + '\n' +
     `--cd                -> Clears the gun database.`                                                                                               + '\n' +
     `--bd                -> Rebuilds the gun database.`                                                                                             + '\n' +
@@ -75,6 +76,15 @@ const cmdError = (err) => {
 
 const cmdWarn = (msg) => {
     console.log(`NOTE: ${msg}`.bgBlack.yellow);
+}
+
+let lastDate = null;
+const cmdLog = (msg, checkTime=false) => {
+    if(args.includes('--verbose')){
+        if(lastDate == null) lastDate = Date.now()
+        console.log(`[log] - ${msg}${checkTime?' - '+((Date.now() - lastDate) / 1000)+'sec':''}`.gray);
+        lastDate = Date.now();
+    }
 }
 
 const cmdCheckArgs = () => {
@@ -134,5 +144,6 @@ module.exports = {
     cmdExit,
     cmdError,
     cmdWarn,
+    cmdLog,
     getArgsVal
 }
