@@ -25,7 +25,8 @@ const cmdHelp = (print=true) => {
     let helpMsg =
     `All Parameters:`                                                                                                                               + '\n' +
     `--help              -> Shows this help menu.`                                                                                                  + '\n' + 
-    `--verbose          -> Shows extra log messages.`                                                                                              + '\n' +
+    `--verbose           -> Shows extra log messages.`                                                                                              + '\n' +
+    `--visualize         -> Draws a matrix of squares to visualize the success rate.`                                                               + '\n' +
     `--f                 -> Forces any action that otherwise prompts a timer.`                                                                      + '\n' +
     `--cd                -> Clears the gun database.`                                                                                               + '\n' +
     `--bd                -> Rebuilds the gun database.`                                                                                             + '\n' +
@@ -35,8 +36,8 @@ const cmdHelp = (print=true) => {
     `--sources           -> Give maximum number of sources per each tradeup. (Ex: --sources 2)`                                                     + '\n' +
     `--rarity            -> Pick the rarity to use for inputs. (Ex: --rarity "Mil-Spec")`                                                           + '\n' +
     `--stattrakChance    -> Number between 0 and 100. Percent of chance for a tradeup to be a stattrak one or not.`                                 + '\n' +
-    `--allowStattrak     -> Include stattrak trade ups.`                                                                                            + '\n' +
-    `--onlyStattrak      -> Include ONLY stattrak trade ups.`                                                                                       + '\n' +
+    `--allowStattrak     -> Include stattrak tradeups.`                                                                                            + '\n' +
+    `--onlyStattrak      -> Include ONLY stattrak tradeups.`                                                                                       + '\n' +
     `--profit            -> When to save a tradeup as profitable. (Ex: --profit 115)`                                                               + '\n' +
     `--minVal            -> Minimum input skin value when generating an input skin. (Ex: --maxVal 1)`                                               + '\n' +
     `--maxVal            -> Maximum input skin value when generating an input skin. (Ex: --maxVal 2)`                                               + '\n' +
@@ -82,6 +83,7 @@ let lastDate = null;
 const cmdLog = (msg, checkTime=false) => {
     if(args.includes('--verbose')){
         if(lastDate == null) lastDate = Date.now()
+        if(msg != undefined)
         console.log(`[log] - ${msg}${checkTime?' - '+((Date.now() - lastDate) / 1000)+'sec':''}`.gray);
         lastDate = Date.now();
     }

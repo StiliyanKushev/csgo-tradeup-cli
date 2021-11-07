@@ -15,6 +15,8 @@ async function main(){
 }
 
 async function handleGeneticAlgoritm(){
+    let targetProfit = (getArgsVal('--profit', 'number') || (args.includes('--noLoss') ? 100:110));
+
     // function to get a random valid rarity based on arguments
     const getValidRarity = (rarities, stattrak=false) => {
         // discard stattrak unusable rarities, discard case unusable rarities
@@ -38,7 +40,8 @@ async function handleGeneticAlgoritm(){
         return new Population(
             getArgsVal('--popSize', 'number') || 20,
             getValidRarity(rarities, stattrak),
-            stattrak
+            stattrak,
+            targetProfit
         ).init()
     })
     populs = await Promise.all(promises);
@@ -46,17 +49,17 @@ async function handleGeneticAlgoritm(){
 
     // run agents
     let initial = results = getArgsVal('--results', 'number') || 1;
-    let bestPopulIndex = -1; 
+    let bestPopulIndex = 0; 
 
     // function to reset the finished population
     const reset = async () => {
         let stattrak = isStattrak();
-        let rarity = getValidRarity(rarities);
         populs[bestPopulIndex] =
         await new Population(
             getArgsVal('--popSize', 'number') || 20,
-            rarity,
-            stattrak
+            getValidRarity(rarities, stattrak),
+            stattrak,
+            targetProfit
         ).init();
     }
 
@@ -64,21 +67,27 @@ async function handleGeneticAlgoritm(){
     while(true){
         let bestAgent = { outcome: { profit: Number.MIN_VALUE } };
 
+        if(!args.includes('--visualize'))
         cmdLog('genetic selection begins.');
+
         await Promise.all(populs.map(async (pop, i, _) => {
             await pop.cycle();
-            pop.bestAgent.outcome.profit > bestAgent.outcome.profit ?
+            pop.bestAgent.outcome.profit > populs[bestPopulIndex].bestAgent.outcome.profit ?
             bestPopulIndex = i : null
         }));
 
         bestAgent = cloneDeep(populs[bestPopulIndex].bestAgent);
+
+        // print the matrix
+        if(args.includes('--visualize'))
+        Population.visualize(populs);
 
         // print current best result
         console.log(`max profit = ${bestAgent.outcome.profit}`);
         cmdLog('genetic selection ends.', true);
 
         // end condition
-        if (bestAgent.outcome.profit > (getArgsVal('--profit', 'number') || (args.includes('--noLoss') ? 100:110))){
+        if (bestAgent.outcome.profit > targetProfit){
             if(args.includes('--noLoss') && bestAgent.hasLoss()) { await reset(); continue; }
 
             // log the best agent before removal
@@ -101,7 +110,7 @@ async function handleEval(){
     let evalPath = getArgsVal('--eval', 'path');
     if(evalPath){
         const evalFile = async (path, filename) => {
-            if(!filename.includes('inputs')){
+            if(filename && !filename.includes('inputs')){
                 cmdWarn(`Skipping ${filename}`);
                 return;
             }
