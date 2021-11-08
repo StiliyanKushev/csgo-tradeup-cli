@@ -2,9 +2,9 @@ const fs = require('fs');
 const cloneDeep = require('lodash.clonedeep');
 const { cmdExit, cmdLog, cmdWarn } = require('../cmd');
 const Skin = require('../models/skin');
-const { randomArr, randomArb } = require('../utils/general');
+const { randomArb } = require('../utils/general');
 const { getArgsVal } = require('../cmd');
-const { numberToRarity, rarityToNumber, RARITIES } = require('../utils/rarity');
+const { RARITIES, getValidRarity } = require('../utils/rarity');
 const Agent = require('./agent');
 const Population = require('./population');
 let args = process.argv.slice(2);
@@ -17,15 +17,22 @@ async function main(){
 async function handleGeneticAlgoritm(){
     let targetProfit = (getArgsVal('--profit', 'number') || (args.includes('--noLoss') ? 100:110));
 
-    // function to get a random valid rarity based on arguments
-    const getValidRarity = (rarities, stattrak=false) => {
-        // discard stattrak unusable rarities, discard case unusable rarities
-        if(stattrak || args.includes('--onlyCases'))
-            for(let i = rarities.length; i >= 0; i--)
-                if(!RARITIES.ALL_INPUTS_STAT_TRAK.includes(rarities[i])) rarities.splice(i, 1);
-                
-        // at the end return what's left
-        return numberToRarity(rarityToNumber(randomArr(rarities, 1)));
+    // function to reset a population
+    const reset = async (index=undefined) => {
+        // use bestPopulIndex otherwise
+        index = index == undefined ? bestPopulIndex : index;
+        let stattrak = isStattrak();
+
+        // not initialized yet
+        if(populs[index] == null){
+            return new Population(
+                getArgsVal('--popSize', 'number') || 20,
+                getValidRarity(rarities, stattrak),
+                stattrak,
+                targetProfit
+            ).init()
+        }
+        else await populs[index].reset(rarities, stattrak, targetProfit);
     }
 
     // get the rarities we're working with
@@ -34,34 +41,14 @@ async function handleGeneticAlgoritm(){
 
     // prepare agents
     cmdLog('populs generation begins.');
-    let populs = new Array((getArgsVal('--populs', 'number') || 20)).fill({});
-    const promises = populs.map(_ => {
-        let stattrak = isStattrak()
-        return new Population(
-            getArgsVal('--popSize', 'number') || 20,
-            getValidRarity(rarities, stattrak),
-            stattrak,
-            targetProfit
-        ).init()
-    })
+    let populs = new Array((getArgsVal('--populs', 'number') || 20)).fill(null);
+    const promises = populs.map((_, index) => reset(index));
     populs = await Promise.all(promises);
     cmdLog('populs generation ends.', true);
 
     // run agents
     let initial = results = getArgsVal('--results', 'number') || 1;
     let bestPopulIndex = 0; 
-
-    // function to reset the finished population
-    const reset = async () => {
-        let stattrak = isStattrak();
-        populs[bestPopulIndex] =
-        await new Population(
-            getArgsVal('--popSize', 'number') || 20,
-            getValidRarity(rarities, stattrak),
-            stattrak,
-            targetProfit
-        ).init();
-    }
 
     // main loop
     while(true){

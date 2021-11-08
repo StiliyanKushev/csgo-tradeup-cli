@@ -10,6 +10,7 @@ const { numToSkinFloat, avrgFloat } = require('../utils/skin');
 const { generateTradespyLink } = require('../tradeupspy');
 const Source = require('../models/source');
 const { advancedGunScrape } = require('../scrape');
+const cloneDeep = require('lodash.clonedeep');
 
 class Agent {
     constructor(rarity, stattrak){
@@ -383,35 +384,60 @@ class Agent {
         return this.fitness;
     }
 
-    async mutate(){
+    async mutate(sfc, fcc){
         // when looking for new skins find one with price margin of 1 euro
         let priceMargin = getArgsVal('--priceMargin', 'number') || 5;
-        let skinFlipChance = getArgsVal('--skinMutate', 'number') || 5;
-        let floatChangeChance = getArgsVal('--floatMutate', 'number') || 1;
+        let skinFlipChance = sfc != undefined ? sfc : getArgsVal('--skinMutate', 'number') || 2;
+        let floatChangeChance = fcc != undefined ? fcc : getArgsVal('--floatMutate', 'number') || 1;
 
-        for(let input of this.inputs){
-            let oldInput = { ...input };
+        await Promise.all(this.inputs.map(async (input, index) => {
+            let newInput;
+            if(randomArb(0,100) <= skinFlipChance){
+                let query = { rarity: this.rarity, isValidInput: true, _id: {$ne: input._id} };
+                query.$or = [
+                    { 'STAT_TRAK.FN.stashVal': { 
+                        $lte: Math.max(0, input[numToSkinFloat(input.float)].stashVal + priceMargin),
+                        $gte: Math.max(0, input[numToSkinFloat(input.float)].stashVal - priceMargin), 
+                    }},
+                    { 'STAT_TRAK.MW.stashVal': { 
+                        $lte: Math.max(0, input[numToSkinFloat(input.float)].stashVal + priceMargin),
+                        $gte: Math.max(0, input[numToSkinFloat(input.float)].stashVal - priceMargin), 
+                    }},
+                    { 'STAT_TRAK.FT.stashVal': { 
+                        $lte: Math.max(0, input[numToSkinFloat(input.float)].stashVal + priceMargin),
+                        $gte: Math.max(0, input[numToSkinFloat(input.float)].stashVal - priceMargin), 
+                    }},
+                    { 'STAT_TRAK.WW.stashVal': { 
+                        $lte: Math.max(0, input[numToSkinFloat(input.float)].stashVal + priceMargin),
+                        $gte: Math.max(0, input[numToSkinFloat(input.float)].stashVal - priceMargin), 
+                    }},
+                    { 'STAT_TRAK.BS.stashVal': { 
+                        $lte: Math.max(0, input[numToSkinFloat(input.float)].stashVal + priceMargin),
+                        $gte: Math.max(0, input[numToSkinFloat(input.float)].stashVal - priceMargin), 
+                    }},
+                ]
+                query = await this.handleInputSources(query);
+                newInput = (await getRandomSkins(1, query))[0];
+                
+                // no other skin to find with this price margin
+                if(newInput == undefined)
+                return;
 
-            if(randomArb(0,100) < skinFlipChance){
-                let query = { rarity: this.rarity, isValidInput: true };
-                query[`${numToSkinFloat(oldInput.float)}.stashVal`] = {
-                    $lte: oldInput[numToSkinFloat(oldInput.float)].stashVal + priceMargin,
-                    $gte: oldInput[numToSkinFloat(oldInput.float)].stashVal - priceMargin,
-                };
-                input = await getRandomSkins(1, await this.handleInputSources(query));
-                input.float = normalize(oldInput.float, oldInput.MIN_WEAR,
-                                                        oldInput.MAX_WEAR,
-                                                        input.MIN_WEAR,
-                                                        input.MAX_WEAR);
+                newInput.float = normalize(input.float, input.MIN_WEAR,
+                                                        input.MAX_WEAR,
+                                                        newInput.MIN_WEAR,
+                                                        newInput.MAX_WEAR);
             }
             if(randomArb(0,100) < floatChangeChance){
-                input.float += randomArb(-0.01,0.01);
-                if(input.float < input.MIN_WEAR) input.float = input.MIN_WEAR + randomArb(0.01,0.05);
-                if(input.float > input.MAX_WEAR) input.float = input.MAX_WEAR - randomArb(0.01,0.05);
+                newInput = input;
+                newInput.float += randomArb(-0.01,0.01);
+                if(newInput.float < newInput.MIN_WEAR) newInput.float = newInput.MIN_WEAR + randomArb(0.01,0.05);
+                if(newInput.float > newInput.MAX_WEAR) newInput.float = newInput.MAX_WEAR - randomArb(0.01,0.05);
             }
 
-            input = await this.override(input);
-        }
+            if(newInput == undefined) return;
+            this.inputs[index] = await this.override(newInput);
+        }))
 
         return this;
     }
