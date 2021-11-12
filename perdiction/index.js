@@ -1,6 +1,6 @@
 const fs = require('fs');
 const cloneDeep = require('lodash.clonedeep');
-const { cmdExit, cmdLog, cmdWarn } = require('../cmd');
+const { cmdExit, cmdLog, cmdWarn, cmdClear } = require('../cmd');
 const Skin = require('../models/skin');
 const { randomArb } = require('../utils/general');
 const { getArgsVal } = require('../cmd');
@@ -49,6 +49,7 @@ async function handleGeneticAlgoritm(){
     // run agents
     let initial = results = getArgsVal('--results', 'number') || 1;
     let bestPopulIndex = 0; 
+    let resultIds = {};
 
     // main loop
     while(true){
@@ -77,18 +78,48 @@ async function handleGeneticAlgoritm(){
         if (bestAgent.outcome.profit > targetProfit){
             if(args.includes('--noLoss') && bestAgent.hasLoss()) { await reset(); continue; }
 
-            // log the best agent before removal
-            await bestAgent.log();
+            // decrease results only if it's from a new population
+            let bestPopId = populs[bestPopulIndex].id;
+            let isNewPopulation = !resultIds[bestPopId];
+            if(isNewPopulation){
+                results--;
+            }
 
-            // when results run out exit
-            if(!--results){
-                finish();
+            // replace population's best score agent
+            if(isNewPopulation){
+                resultIds[bestPopId] = cloneDeep(populs[bestPopulIndex].bestAgent);
             }
             else {
-                console.log(`[#] ${initial - results}/${initial} generated.`.gray);
-                await reset();
+                // if new agent is better then save it
+                if(resultIds[bestPopId].outcome.profit < populs[bestPopulIndex].bestAgent){
+                    resultIds[bestPopId] = cloneDeep(populs[bestPopulIndex].bestAgent);
+                }
+                // otherwise reset the population and search for new tradeup
+                else await reset();
+            }
+
+            // log the agent (or update the json file of the agent)
+            let msg = !(args.includes('--spy') && args.includes('--visualize'));
+            let success = msg;
+            await bestAgent.log(`./results/inputs_${bestPopId}.json`, { msg, success }, true);
+
+            // when results run out exit
+            if(!results){
+                if(args.includes('--spy') && args.includes('--visualize')){
+                    // print all spy links
+                    cmdClear();
+                    console.log('[#] Tradeupspy.com Links generating...'.green);
+                    await Promise.all(Object.keys(resultIds).map(async popId => {
+                        await resultIds[popId].log(`./results/inputs_${popId}.json`, { msg:false, success:true }, true);
+                    }));
+                    cmdExit();
+                }
+                finish();
             }
         }
+        
+        // print remaining
+        console.log(`[#] ${initial - results}/${initial} generated.`.gray);
     }
 }
 
@@ -96,30 +127,6 @@ async function handleEval(){
     // run only one agent with the given inputs
     let evalPath = getArgsVal('--eval', 'path');
     if(evalPath){
-        const evalFile = async (path, filename) => {
-            if(filename && !filename.includes('inputs')){
-                cmdWarn(`Skipping ${filename}`);
-                return;
-            }
-            // get all inputs from the eval path and convert them to the database docs
-            let parsed = JSON.parse(fs.readFileSync(filename ? path + filename : path));
-            let inputs = [];
-            await Promise.all(parsed.inputs.map(async e => {
-                inputs.push(await Skin.findOne({ name:e.name }).lean());
-            }));
-
-            // set the specific floats and prices from the eval path
-            parsed.inputs.map((_, i, __) => {
-                inputs[i].float = parsed.inputs[i].float;
-                inputs[i].price = parsed.inputs[i].price;
-            })
-            
-            // run the agent
-            let agent = await new Agent(parsed.rarity, parsed.stattrak).init(inputs);
-            await agent.calcTradeup();
-            await agent.log(filename);
-        }
-
         if(fs.lstatSync(evalPath).isDirectory()){
             for(let file of fs.readdirSync(evalPath)){
                 await evalFile(evalPath, file);
@@ -131,6 +138,30 @@ async function handleEval(){
 
         finish();
     }
+}
+
+async function evalFile(path, filename){
+    if(filename && !filename.includes('inputs')){
+        cmdWarn(`Skipping ${filename}`);
+        return;
+    }
+    // get all inputs from the eval path and convert them to the database docs
+    let parsed = JSON.parse(fs.readFileSync(filename ? path + filename : path));
+    let inputs = [];
+    await Promise.all(parsed.inputs.map(async e => {
+        inputs.push(await Skin.findOne({ name:e.name }).lean());
+    }));
+
+    // set the specific floats and prices from the eval path
+    parsed.inputs.map((_, i, __) => {
+        inputs[i].float = parsed.inputs[i].float;
+        inputs[i].price = parsed.inputs[i].price;
+    })
+    
+    // run the agent
+    let agent = await new Agent(parsed.rarity, parsed.stattrak).init(inputs);
+    await agent.calcTradeup();
+    await agent.log(filename);
 }
 
 function isStattrak(){

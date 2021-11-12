@@ -16,7 +16,7 @@ init(async () => {
     if(args.includes('--help'))
     cmdHelp();
 
-    if(args.includes('--cd') || args.includes('--bd'))
+    if(args.includes('--cd'))
     await clearDatabase();
 
     if(args.includes('--bd'))

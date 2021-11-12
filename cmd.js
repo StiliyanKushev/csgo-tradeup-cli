@@ -36,13 +36,14 @@ const cmdHelp = (print=true) => {
     `--sources           -> Give maximum number of sources per each tradeup. (Ex: --sources 2)`                                                     + '\n' +
     `--rarity            -> Pick the rarity to use for inputs. (Ex: --rarity "Mil-Spec")`                                                           + '\n' +
     `--stattrakChance    -> Number between 0 and 100. Percent of chance for a tradeup to be a stattrak one or not.`                                 + '\n' +
-    `--allowStattrak     -> Include stattrak tradeups.`                                                                                            + '\n' +
-    `--onlyStattrak      -> Include ONLY stattrak tradeups.`                                                                                       + '\n' +
+    `--allowStattrak     -> Include stattrak tradeups.`                                                                                             + '\n' +
+    `--onlyStattrak      -> Include ONLY stattrak tradeups.`                                                                                        + '\n' +
     `--profit            -> When to save a tradeup as profitable. (Ex: --profit 115)`                                                               + '\n' +
     `--minVal            -> Minimum input skin value when generating an input skin. (Ex: --maxVal 1)`                                               + '\n' +
     `--maxVal            -> Maximum input skin value when generating an input skin. (Ex: --maxVal 2)`                                               + '\n' +
     `--priceMargin       -> Used when looking for a replacement skin. More = more risky tradeups. (Ex: --priceMargin 5)`                            + '\n' +
     `--avf               -> Include the average float in the fitness calculation. (May give less frequent results)`                                 + '\n' +
+    `--avfm              -> Number between 0 and 1. (Def 0.1) How much of the '--avf' should be added to the fitness.`                              + '\n' +
     `--noFee             -> Remove the steam fee when calculating the profits.`                                                                     + '\n' +
     `--populs            -> Number of populations that will try to constructs a tradeup. (Ex: --populs 20)`                                         + '\n' +
     `--popSize           -> Number of agents to work on each tradeup simulation. (Ex: --popSize 20)`                                                + '\n' +

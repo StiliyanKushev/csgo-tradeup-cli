@@ -10,12 +10,12 @@ const { numToSkinFloat, avrgFloat } = require('../utils/skin');
 const { generateTradespyLink } = require('../tradeupspy');
 const Source = require('../models/source');
 const { advancedGunScrape } = require('../scrape');
-const cloneDeep = require('lodash.clonedeep');
 
 class Agent {
-    constructor(rarity, stattrak){
+    constructor(rarity, stattrak, populationId){
         this.stattrak = stattrak;
         this.id = Number(Math.random().toString().substr(2));
+        this.populationId = populationId;
         this.rarity = rarity;
         this.inputs = []; // the inputs are the dna of the agent
         this.outcome = {
@@ -200,10 +200,31 @@ class Agent {
                 let sourceNames = await this.getFileSources(true, false, true);
                 sourceNames.map(s => sourcesQuery.$and.push({ name: { $ne: s } }));
             }
-            else if(args.includes('--include')){
-                sourcesQuery.$or = [];
-                let sourceNames = await this.getFileSources(false, false, true);
-                sourceNames.map(s => sourcesQuery.$or.push({ name: s }));
+            else {
+                if(args.includes('--include')){
+                    sourcesQuery.$or = [];
+                    let sourceNames = await this.getFileSources(false, false, true);
+                    sourceNames.map(s => sourcesQuery.$or.push({ name: s }));
+                }
+
+                if(this.stattrak || args.includes('--onlyCases')){
+                    // remove matches from $or and $and
+                    if(sourcesQuery.$or) for(let i = 0; i < sourcesQuery.$or.length; i++)
+                    if(sourcesQuery.$or[i].name.includes('Case'))
+                    sourcesQuery.$or.splice(i, 1);
+    
+                    // add source regex case to the query
+                    sourcesQuery.name = { $regex: 'Case', $options: 'igm' }
+                }
+                else if(args.includes('--onlyCollections')){
+                    // remove matches from $or and $and
+                    if(sourcesQuery.$or) for(let i = 0; i < sourcesQuery.$or.length; i++)
+                    if(!sourcesQuery.$or[i].name.includes('Case'))
+                    sourcesQuery.$or.splice(i, 1);
+    
+                    // add source regex case to the query
+                    sourcesQuery.name = { $regex: '^((?!Case).)*$', $options: 'igm' }
+                }
             }
             
             // get 'n' random source names
@@ -223,39 +244,42 @@ class Agent {
                 $or: rules
             });
         }
-        else if(args.includes('--exclude')){
-            let sourceNames = await this.getFileSources(true, false, true);
 
-            // update the query
-            sourceNames.map(s => query.$and.push({ source: { $ne: s } }));
-        }
-        else if(args.includes('--include')){
-            let [sourceNames, commonRarities] = 
-            await this.getCommonRarities(await this.getFileSources(false, true), this.rarity, true);
-
-            // throw error if none where found
-            if(!sourceNames) printCommonRaritiesError(commonRarities)
-
-            // translate source names into $or rules
-            let rules = [];
-            sourceNames.map(s => rules.push({ source: s }));
-            
-            // update the query
-            query.$and.push({
-                $or: rules
-            });
-        }
-
-        // there are not stattrak skins in collections
-        if(this.stattrak || args.includes('--onlyCases')){
-            query.$and.push({
-                source: { $regex: 'Case', $options: 'igm' }
-            });
-        }
-        else if(args.includes('--onlyCollections')){
-            query.$and.push({
-                source: { $regex: '^((?!Case).)*$', $options: 'igm' }
-            });
+        else {
+            if(args.includes('--exclude')){
+                let sourceNames = await this.getFileSources(true, false, true);
+    
+                // update the query
+                sourceNames.map(s => query.$and.push({ source: { $ne: s } }));
+            }
+            else if(args.includes('--include')){
+                let [sourceNames, commonRarities] = 
+                await this.getCommonRarities(await this.getFileSources(false, true), this.rarity, true);
+    
+                // throw error if none where found
+                if(!sourceNames) printCommonRaritiesError(commonRarities)
+    
+                // translate source names into $or rules
+                let rules = [];
+                sourceNames.map(s => rules.push({ source: s }));
+                
+                // update the query
+                query.$and.push({
+                    $or: rules
+                });
+            }
+    
+            // there are not stattrak skins in collections
+            if(this.stattrak || args.includes('--onlyCases')){
+                query.$and.push({
+                    source: { $regex: 'Case', $options: 'igm' }
+                });
+            }
+            else if(args.includes('--onlyCollections')){
+                query.$and.push({
+                    source: { $regex: '^((?!Case).)*$', $options: 'igm' }
+                });
+            }
         }
 
         if(query.$and.length == 0) delete query.$and;
@@ -306,7 +330,7 @@ class Agent {
         }
     }
 
-    async log(filename=undefined){
+    async log(filename=undefined, printSpyMsg={msg:true,success:true}, fileNameIsPath){
         let trimmedInputs = [];
         let trimmedOutputs = [];
 
@@ -347,29 +371,34 @@ class Agent {
             stattrak: this.stattrak,
         };
 
-        if(args.includes('--spy')) console.log("[#] Tradeupspy.com Link generating...".green);
+
+        if(printSpyMsg.msg && args.includes('--spy')) console.log("[#] Tradeupspy.com Link generating...".green);
         let tradespyLink = args.includes('--spy')
                          ? await generateTradespyLink(this.inputs, this.outcome.outputs, this.stattrak)
                          : undefined;
         if(tradespyLink) {
             result.tradespyLink = tradespyLink;
-            console.log(tradespyLink.bgWhite.black);
-            console.log("[#] Success!".bgCyan.black);
+            if(printSpyMsg.success){
+                console.log(tradespyLink.bgWhite.black);
+                console.log("[#] Success!".bgCyan.black);
+            }
         }
 
         if(args.includes('--noSave')) return;
 
         let evalJson = getArgsVal('--eval', 'string');
         if((evalJson || filename)) {
+            if(filename && fileNameIsPath) evalJson = filename;
             let nameFile = evalJson.split('/').pop();
-            fs.writeFileSync(filename ? `./evals/${filename}` : `./evals/${nameFile}`, 
-                                                  JSON.stringify(result, null, '\t'));
-            console.log(`${nameFile} has been saved in /evals/`.bgCyan.black);
+            let savePath = filename ? `./evals/${filename}` : `./evals/${nameFile}`
+            if(fileNameIsPath === true) savePath = filename;
+            fs.writeFileSync(savePath, JSON.stringify(result, null, '\t'));
+            if(printSpyMsg.msg) console.log(`${nameFile} has been saved in /evals/`.bgCyan.black);
         }
         else {
-            let nameFile = `inputs_${this.id}.json`;
+            let nameFile = `inputs_${this.populationId}.json`;
             fs.writeFileSync(`./results/${nameFile}`, JSON.stringify(result, null, '\t'));
-            console.log(`${nameFile} has been saved in /results/`.bgCyan.black);
+            if(printSpyMsg.msg) console.log(`${nameFile} has been saved in /results/`.bgCyan.black);
         }
     }
 
@@ -378,7 +407,7 @@ class Agent {
         this.fitness = this.outcome.profit;
 
         if(args.includes('--avf'))
-        this.fitness *= this.outcome.avrgFloat * 0.1;
+        this.fitness *= this.outcome.avrgFloat * getArgsVal('--avfm', 'number') || 0.1;
 
         if(isNaN(this.fitness)) this.fitness = 0;
         return this.fitness;

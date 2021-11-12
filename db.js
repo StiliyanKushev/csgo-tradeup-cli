@@ -28,6 +28,7 @@ async function buildDatabase(){
         
     // give time to cancel
     await cmdTimer("Ctrl-C to cancel".bgRed.white);
+    await clearDatabase();
 
     // fetch all of the skins and put them into a mongo DB database
     await updateDatabase(args);

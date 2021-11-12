@@ -1,23 +1,23 @@
 const Agent = require('./agent');
 const { randomArr, randomArb } = require('../utils/general');
 const cloneDeep = require('lodash.clonedeep');
-const { cmdClear, cmdExit } = require('../cmd');
+const { cmdClear } = require('../cmd');
 const { getValidRarity } = require('../utils/rarity');
 let args = process.argv.slice(2);
 
 class Population {
     constructor(size, rarity, stattrak, targetProfit){
-        this.id = Number(Math.random().toString().substr(2));
         this._constructor(size, rarity, stattrak, targetProfit);
     }
 
     // used that way so I can reset the population from itself
     _constructor(size, rarity, stattrak, targetProfit){
+        this.id = Number(Math.random().toString().substr(2));
         this.rarity = rarity;
         this.size = size;
         this.stattrak = stattrak;
         this.targetProfit = targetProfit;
-        this.data = Array.from({ length:size }, () => new Agent(rarity, stattrak));
+        this.data = Array.from({ length:size }, () => new Agent(rarity, stattrak, this.id));
         this.pool = [];
         this.bestAgent = { outcome: { profit: Number.MIN_VALUE } };
         
@@ -55,6 +55,7 @@ class Population {
         await this.matingPool();
         await this.middleware();
         await this.selection();
+        return this;
     }
 
     async matingPool(){
@@ -107,7 +108,7 @@ class Population {
     }
 
     async crossover(parentA, parentB){
-        let child = new Agent(this.rarity, this.stattrak);
+        let child = new Agent(this.rarity, this.stattrak, this.id);
         let midPoint = Math.floor(randomArb(0, 10));
         let parentA_DNA = randomArr(parentA.inputs, midPoint);
         let parentB_DNA = randomArr(parentB.inputs, 10 - midPoint);
