@@ -11,7 +11,7 @@ let dbConnection = null;
 const getConnection = () => dbConnection;
 
 function init(onReady) {
-    mongoose.connect('mongodb://localhost/csgotradebot', {useNewUrlParser:true, useUnifiedTopology:true});
+    mongoose.connect('mongodb://localhost/csgotradebot', {poolSize: 40, useNewUrlParser:true, useUnifiedTopology:true});
     mongoose.set('useFindAndModify', false);
     dbConnection = mongoose.connection;
     dbConnection.once("open", (err) => {

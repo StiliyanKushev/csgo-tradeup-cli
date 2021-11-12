@@ -46,7 +46,6 @@ async function handleGeneticAlgoritm(){
     populs = await Promise.all(promises);
     cmdLog('populs generation ends.', true);
 
-    // run agents
     let initial = results = getArgsVal('--results', 'number') || 1;
     let bestPopulIndex = 0; 
     let resultIds = {};
