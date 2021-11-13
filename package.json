@@ -20,7 +20,8 @@
   "pkg": {
     "scripts": [
       "*.js",
-      "models/*.js"
+      "models/*.js",
+      "prediction/*.js"
     ],
     "outputPath": "dist"
   }
