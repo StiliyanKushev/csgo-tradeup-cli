@@ -1,5 +1,4 @@
 const fs = require('fs');
-const cloneDeep = require('lodash.clonedeep');
 const { cmdExit, cmdLog, cmdWarn, cmdClear } = require('../cmd');
 const Skin = require('../models/skin');
 const { randomArb } = require('../utils/general');
@@ -9,6 +8,7 @@ const Agent = require('./agent');
 const Population = require('./population');
 const { StaticPool } = require('node-worker-threads-pool');
 const path = require('path');
+const { serialize, deserialize } = require('v8');
 const { getArgs } = require('../utils/args');
 
 async function main(){
@@ -73,13 +73,7 @@ async function handleGeneticAlgoritm(){
             bestPopulIndex = i : null
         }));
 
-        // await Promise.all(populs.map(async (_, i, __) => {
-        //     await populs[i].cycle();
-        //     populs[i].bestAgent.outcome.profit > populs[bestPopulIndex].bestAgent.outcome.profit ?
-        //     bestPopulIndex = i : null
-        // }));
-
-        bestAgent = cloneDeep(populs[bestPopulIndex].bestAgent);
+        bestAgent = deserialize(serialize(populs[bestPopulIndex].bestAgent))
 
         // print the matrix
         if(getArgs().includes('--visualize'))
@@ -102,12 +96,12 @@ async function handleGeneticAlgoritm(){
 
             // replace population's best score agent
             if(isNewPopulation){
-                resultIds[bestPopId] = cloneDeep(populs[bestPopulIndex].bestAgent);
+                resultIds[bestPopId] = deserialize(serialize(populs[bestPopulIndex].bestAgent));
             }
             else {
                 // if new agent is better then save it
                 if(resultIds[bestPopId].outcome.profit < populs[bestPopulIndex].bestAgent){
-                    resultIds[bestPopId] = cloneDeep(populs[bestPopulIndex].bestAgent);
+                    resultIds[bestPopId] = deserialize(serialize(populs[bestPopulIndex].bestAgent));
                 }
                 // otherwise reset the population and search for new tradeup
                 else await reset();

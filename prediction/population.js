@@ -1,10 +1,9 @@
 const Agent = require('./agent');
 const { randomArr, randomArb } = require('../utils/general');
-const cloneDeep = require('lodash.clonedeep');
-const { cmdClear, cmdExit } = require('../cmd');
+const { cmdClear } = require('../cmd');
 const { getValidRarity } = require('../utils/rarity');
 const { getArgs } = require('../utils/args');
-const { serialize, deserialize } = require("v8");
+const { serialize, deserialize } = require('v8');
 
 class Population {
     constructor(size, rarity, stattrak, targetProfit){
@@ -88,7 +87,7 @@ class Population {
                 bestAgentIndex = index;
             }
         }));
-        this.bestAgent = cloneDeep(this.data[bestAgentIndex]);
+        this.bestAgent = deserialize(serialize(this.data[bestAgentIndex]));
 
         // normalize every fitness by the max fitness
         let sumFitness = 0;
