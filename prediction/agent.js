@@ -1,4 +1,4 @@
-let args = process.argv.slice(2);
+const { getArgs } = require('../utils/args');
 const fs = require('fs');
 const readline = require('readline');
 const Skin = require('../models/skin');
@@ -13,6 +13,8 @@ const { advancedGunScrape } = require('../scrape');
 
 class Agent {
     constructor(rarity, stattrak, populationId){
+        if(rarity == undefined) return; // prevent errors when deserializing
+
         this.stattrak = stattrak;
         this.id = Number(Math.random().toString().substr(2));
         this.populationId = populationId;
@@ -28,6 +30,12 @@ class Agent {
         this.fitness = 0;
         
         return this;
+    }
+
+    static deserialize(object){
+        let instance = new Agent();
+        Object.assign(instance, object);
+        return instance;
     }
 
     async init(inputs=[]){
@@ -150,7 +158,7 @@ class Agent {
     }
 
     async override(input=undefined){
-        if(!args.includes('--override')) return input;
+        if(!getArgs().includes('--override')) return input;
         let path = getArgsVal('--override', 'path');
 
         const check = async (data) => {
@@ -186,7 +194,7 @@ class Agent {
                      common);
         }
 
-        if(args.includes('--sources')){
+        if(getArgs().includes('--sources')){
             // number of allowed sources per tradeup/agent
             let numSources = getArgsVal('--sources', 'number');
 
@@ -195,19 +203,19 @@ class Agent {
             sourcesQuery[`${query.rarity}`] = true;
 
             // add excluded/included sources
-            if(args.includes('--exclude')){
+            if(getArgs().includes('--exclude')){
                 sourcesQuery.$and = [];
                 let sourceNames = await this.getFileSources(true, false, true);
                 sourceNames.map(s => sourcesQuery.$and.push({ name: { $ne: s } }));
             }
             else {
-                if(args.includes('--include')){
+                if(getArgs().includes('--include')){
                     sourcesQuery.$or = [];
                     let sourceNames = await this.getFileSources(false, false, true);
                     sourceNames.map(s => sourcesQuery.$or.push({ name: s }));
                 }
 
-                if(this.stattrak || args.includes('--onlyCases')){
+                if(this.stattrak || getArgs().includes('--onlyCases')){
                     // remove matches from $or and $and
                     if(sourcesQuery.$or) for(let i = 0; i < sourcesQuery.$or.length; i++)
                     if(sourcesQuery.$or[i].name.includes('Case'))
@@ -216,7 +224,7 @@ class Agent {
                     // add source regex case to the query
                     sourcesQuery.name = { $regex: 'Case', $options: 'igm' }
                 }
-                else if(args.includes('--onlyCollections')){
+                else if(getArgs().includes('--onlyCollections')){
                     // remove matches from $or and $and
                     if(sourcesQuery.$or) for(let i = 0; i < sourcesQuery.$or.length; i++)
                     if(!sourcesQuery.$or[i].name.includes('Case'))
@@ -246,13 +254,13 @@ class Agent {
         }
 
         else {
-            if(args.includes('--exclude')){
+            if(getArgs().includes('--exclude')){
                 let sourceNames = await this.getFileSources(true, false, true);
     
                 // update the query
                 sourceNames.map(s => query.$and.push({ source: { $ne: s } }));
             }
-            else if(args.includes('--include')){
+            else if(getArgs().includes('--include')){
                 let [sourceNames, commonRarities] = 
                 await this.getCommonRarities(await this.getFileSources(false, true), this.rarity, true);
     
@@ -270,12 +278,12 @@ class Agent {
             }
     
             // there are not stattrak skins in collections
-            if(this.stattrak || args.includes('--onlyCases')){
+            if(this.stattrak || getArgs().includes('--onlyCases')){
                 query.$and.push({
                     source: { $regex: 'Case', $options: 'igm' }
                 });
             }
-            else if(args.includes('--onlyCollections')){
+            else if(getArgs().includes('--onlyCollections')){
                 query.$and.push({
                     source: { $regex: '^((?!Case).)*$', $options: 'igm' }
                 });
@@ -372,8 +380,8 @@ class Agent {
         };
 
 
-        if(printSpyMsg.msg && args.includes('--spy')) console.log("[#] Tradeupspy.com Link generating...".green);
-        let tradespyLink = args.includes('--spy')
+        if(printSpyMsg.msg && getArgs().includes('--spy')) console.log("[#] Tradeupspy.com Link generating...".green);
+        let tradespyLink = getArgs().includes('--spy')
                          ? await generateTradespyLink(this.inputs, this.outcome.outputs, this.stattrak)
                          : undefined;
         if(tradespyLink) {
@@ -384,7 +392,7 @@ class Agent {
             }
         }
 
-        if(args.includes('--noSave')) return;
+        if(getArgs().includes('--noSave')) return;
 
         let evalJson = getArgsVal('--eval', 'string');
         if((evalJson || filename)) {
@@ -406,7 +414,7 @@ class Agent {
         await this.calcTradeup();
         this.fitness = this.outcome.profit;
 
-        if(args.includes('--avf'))
+        if(getArgs().includes('--avf'))
         this.fitness *= this.outcome.avrgFloat * getArgsVal('--avfm', 'number') || 0.1;
 
         if(isNaN(this.fitness)) this.fitness = 0;
@@ -472,7 +480,7 @@ class Agent {
     }
 
     async updatePrices(skins){
-        if(!args.includes('--smart')) return skins;
+        if(!getArgs().includes('--smart')) return skins;
 
         await Promise.all(skins.map(async (_el, i, skins) => {
             let url = `https://csgostash.com/skin/${skins[i].CSGO_STASH_ID}/${skins[i].CSGO_STASH_NAME}`;
@@ -591,7 +599,7 @@ class Agent {
             expectedValue += output.price * output.chance / 100;
         }
 
-        if(!args.includes('--noFee')){
+        if(!getArgs().includes('--noFee')){
             // add steam fee 15%
             expectedValue /= 1.15;
         }

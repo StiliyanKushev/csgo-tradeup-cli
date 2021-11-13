@@ -1,11 +1,11 @@
 const colors = require('colors');
 const fs = require('fs');
-let args = process.argv.slice(2);
+const { getArgs } = require('./utils/args');
 
 
 const cmdTimer = (text) => {
     return new Promise((resolve, reject) => {
-        if(args.includes('--f')) {resolve(); return;}
+        if(getArgs().includes('--f')) {resolve(); return;}
         let i = 5, timer = setInterval(() => {
             console.log(`${text}: ${i--}`);
             if(i == 0){
@@ -82,7 +82,7 @@ const cmdWarn = (msg) => {
 
 let lastDate = null;
 const cmdLog = (msg, checkTime=false) => {
-    if(args.includes('--verbose')){
+    if(getArgs().includes('--verbose')){
         if(lastDate == null) lastDate = Date.now()
         if(msg != undefined)
         console.log(`[log] - ${msg}${checkTime?' - '+((Date.now() - lastDate) / 1000)+'sec':''}`.gray);
@@ -92,7 +92,7 @@ const cmdLog = (msg, checkTime=false) => {
 
 const cmdCheckArgs = () => {
     let helpMsg = cmdHelp(false);
-    for(let arg of args){
+    for(let arg of getArgs()){
         if(arg.startsWith('--')){
             if(!helpMsg.match(arg + ' ')) {
                 cmdError(`Unknown argument: '${arg}'. Use --help for more info. `);
@@ -102,10 +102,9 @@ const cmdCheckArgs = () => {
 }
 
 function getArgsVal(arg, type){
-    let args = process.argv.slice(2);
-    let val = args[args.indexOf(arg) + 1];
+    let val = getArgs()[getArgs().indexOf(arg) + 1];
 
-    if(args.indexOf(arg) == -1) return undefined;
+    if(getArgs().indexOf(arg) == -1) return undefined;
     if(val == undefined || val.startsWith('-')) 
     cmdError(`Argument '${arg}' expects a value. Use --help for more info.`);
 

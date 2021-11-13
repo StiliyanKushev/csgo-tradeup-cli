@@ -4,14 +4,14 @@ const { updateDatabase } = require("./scrape");
 const colors = require('colors');
 const Skin = require('./models/skin');
 const Source = require('./models/source');
-let args = process.argv.slice(2);
+const { getArgs } = require("./utils/args");
 mongoose.Promise = global.Promise;
 
 let dbConnection = null;
 const getConnection = () => dbConnection;
 
 function init(onReady) {
-    mongoose.connect('mongodb://localhost/csgotradebot', {poolSize: 40, useNewUrlParser:true, useUnifiedTopology:true});
+    mongoose.connect('mongodb://localhost/csgotradebot', {poolSize: 100, useNewUrlParser:true, useUnifiedTopology:true});
     mongoose.set('useFindAndModify', false);
     dbConnection = mongoose.connection;
     dbConnection.once("open", (err) => {
@@ -31,7 +31,7 @@ async function buildDatabase(){
     await clearDatabase();
 
     // fetch all of the skins and put them into a mongo DB database
-    await updateDatabase(args);
+    await updateDatabase();
     console.log("Database has been updated.".bgCyan.black);   
 }
 
@@ -49,7 +49,7 @@ async function clearDatabase(){
     console.log("Clearing the database.".bgCyan.black);
     try { await Skin.collection.drop()   } catch { /* is empty */ }
     try { await Source.collection.drop() } catch { /* is empty */ }
-    if(!args.includes('--bd')) {
+    if(!getArgs().includes('--bd')) {
         console.log("Done.".bgCyan.black);
     }
 }
