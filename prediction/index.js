@@ -7,7 +7,9 @@ const { getArgsVal } = require('../cmd');
 const { RARITIES, getValidRarity } = require('../utils/rarity');
 const Agent = require('./agent');
 const Population = require('./population');
-let args = process.argv.slice(2);
+const { StaticPool } = require('node-worker-threads-pool');
+const path = require('path');
+const { getArgs } = require('../utils/args');
 
 async function main(){
     await handleEval();
@@ -15,7 +17,7 @@ async function main(){
 }
 
 async function handleGeneticAlgoritm(){
-    let targetProfit = (getArgsVal('--profit', 'number') || (args.includes('--noLoss') ? 100:110));
+    let targetProfit = (getArgsVal('--profit', 'number') || (getArgs().includes('--noLoss') ? 100:110));
 
     // function to reset a population
     const reset = async (index=undefined) => {
@@ -50,23 +52,37 @@ async function handleGeneticAlgoritm(){
     let bestPopulIndex = 0; 
     let resultIds = {};
 
+    const staticPool = new StaticPool({
+        size: require('os').cpus().length,
+        shareEnv: true,
+        task: path.join(process.cwd(), './prediction/worker.js'),
+        workerData: getArgs()
+    });
+
     // main loop
     while(true){
         let bestAgent = { outcome: { profit: Number.MIN_VALUE } };
 
-        if(!args.includes('--visualize'))
+        if(!getArgs().includes('--visualize'))
         cmdLog('genetic selection begins.');
 
-        await Promise.all(populs.map(async (pop, i, _) => {
-            await pop.cycle();
-            pop.bestAgent.outcome.profit > populs[bestPopulIndex].bestAgent.outcome.profit ?
+        await Promise.all(populs.map(async (_, i, __) => {
+            let cycled = await staticPool.exec(populs[i].serialize());
+            populs[i] = Population.deserialize(cycled);
+            populs[i].bestAgent.outcome.profit > populs[bestPopulIndex].bestAgent.outcome.profit ?
             bestPopulIndex = i : null
         }));
+
+        // await Promise.all(populs.map(async (_, i, __) => {
+        //     await populs[i].cycle();
+        //     populs[i].bestAgent.outcome.profit > populs[bestPopulIndex].bestAgent.outcome.profit ?
+        //     bestPopulIndex = i : null
+        // }));
 
         bestAgent = cloneDeep(populs[bestPopulIndex].bestAgent);
 
         // print the matrix
-        if(args.includes('--visualize'))
+        if(getArgs().includes('--visualize'))
         Population.visualize(populs);
 
         // print current best result
@@ -75,7 +91,7 @@ async function handleGeneticAlgoritm(){
 
         // end condition
         if (bestAgent.outcome.profit > targetProfit){
-            if(args.includes('--noLoss') && bestAgent.hasLoss()) { await reset(); continue; }
+            if(getArgs().includes('--noLoss') && bestAgent.hasLoss()) { await reset(); continue; }
 
             // decrease results only if it's from a new population
             let bestPopId = populs[bestPopulIndex].id;
@@ -98,13 +114,13 @@ async function handleGeneticAlgoritm(){
             }
 
             // log the agent (or update the json file of the agent)
-            let msg = !(args.includes('--spy') && args.includes('--visualize'));
+            let msg = !(getArgs().includes('--spy') && getArgs().includes('--visualize'));
             let success = msg;
             await bestAgent.log(`./results/inputs_${bestPopId}.json`, { msg, success }, true);
 
             // when results run out exit
             if(!results){
-                if(args.includes('--spy') && args.includes('--visualize')){
+                if(getArgs().includes('--spy') && getArgs().includes('--visualize')){
                     // print all spy links
                     cmdClear();
                     console.log('[#] Tradeupspy.com Links generating...'.green);
@@ -164,8 +180,8 @@ async function evalFile(path, filename){
 }
 
 function isStattrak(){
-    if(args.includes('--onlyStattrak')) return true;
-    if(args.includes('--allowStattrak')){
+    if(getArgs().includes('--onlyStattrak')) return true;
+    if(getArgs().includes('--allowStattrak')){
         let randNum = randomArb(0, 1);
         if(randNum > ((getArgsVal('--stattrakChance', 'number') / 100) || 0.05)) return true;
     }

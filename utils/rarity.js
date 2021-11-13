@@ -1,6 +1,5 @@
 const { randomArr } = require("./general");
-
-let args = process.argv.slice(2);
+const { getArgs } = require('./args');
 
 const RARITIES = {
     Consumer: "Consumer",
@@ -54,7 +53,7 @@ function getHighestRarity(array) {
 // function to get a random valid rarity based on arguments
 function getValidRarity(rarities, stattrak=false){
     // discard stattrak unusable rarities, discard case unusable rarities
-    if(stattrak || args.includes('--onlyCases'))
+    if(stattrak || getArgs().includes('--onlyCases'))
         for(let i = rarities.length; i >= 0; i--)
             if(!RARITIES.ALL_INPUTS_STAT_TRAK.includes(rarities[i])) rarities.splice(i, 1);
             

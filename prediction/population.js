@@ -1,12 +1,16 @@
 const Agent = require('./agent');
 const { randomArr, randomArb } = require('../utils/general');
 const cloneDeep = require('lodash.clonedeep');
-const { cmdClear } = require('../cmd');
+const { cmdClear, cmdExit } = require('../cmd');
 const { getValidRarity } = require('../utils/rarity');
-let args = process.argv.slice(2);
+const { getArgs } = require('../utils/args');
+const { serialize, deserialize } = require("v8");
 
 class Population {
     constructor(size, rarity, stattrak, targetProfit){
+        if(size == undefined) return; // prevent bugs when deserialize
+
+        // do the actual constructor logic
         this._constructor(size, rarity, stattrak, targetProfit);
     }
 
@@ -45,6 +49,19 @@ class Population {
             this.stattrak,
             this.targetProfit,
         ).init();
+    }
+
+    serialize(){
+        return serialize(this);
+    }
+
+    static deserialize(serialized){
+        let parsed = deserialize(serialized);
+        let instance = new Population();
+        parsed.data.map((_, i, arr) => arr[i] = Agent.deserialize(arr[i]));
+        parsed.bestAgent = Agent.deserialize(parsed.bestAgent);
+        Object.assign(instance, parsed);
+        return instance;
     }
 
     init(){
@@ -131,11 +148,11 @@ class Population {
     }
 
     calcLine(){
-        if(!args.includes('--visualize')) return;
+        if(!getArgs().includes('--visualize')) return;
 
         let rowText = '';
         for(let col = 0; col < this.data.length; col++){
-            if(!args.includes('--verbose'))
+            if(!getArgs().includes('--verbose'))
             rowText += this.getColoredSquare(this.data[col]).square + ' ';
             
             else {

@@ -262,11 +262,11 @@ async function updateMongose(scrapedData){
     }
 }
 
-async function updateDatabase(args){
+async function updateDatabase(){
     let scrapedData;
 
     // parse the json and get the scraped data
-    if(args.includes('--json')){
+    if(getArgs().includes('--json')){
         let path = getArgsVal('--json', 'string');
         if(!fs.existsSync(path)) throw new Error("Path for json file is not correct.");
         scrapedData = JSON.parse(fs.readFileSync(path));
@@ -278,7 +278,7 @@ async function updateDatabase(args){
 
     console.log("[#] scraping data finished!".green);
 
-    if(args.includes('--sdb')){
+    if(getArgs().includes('--sdb')){
         fs.writeFileSync(`data_${Date.now()}.json`, JSON.stringify(scrapedData));
         console.log("[#] scraped data saved to a file!".green);
     }
