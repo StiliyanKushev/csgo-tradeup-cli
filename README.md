@@ -1,10 +1,13 @@
 # CSGO Tradeup CLI
 ## _Generate profit, waste no time!_
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=GXK6UYPH5SK5C)
+
 \
 An easy way to compute profitable csgo tradeups
 that are easy to farm within minutes.
 
 ![alt text](https://i.imgur.com/hqpV6WO.png)
+
 
 ## Features
 - Up to date prices and guns database.
