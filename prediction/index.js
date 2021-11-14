@@ -73,7 +73,7 @@ async function handleGeneticAlgoritm(){
             bestPopulIndex = i : null
         }));
 
-        bestAgent = deserialize(serialize(populs[bestPopulIndex].bestAgent))
+        bestAgent = Agent.deserialize(deserialize(serialize(populs[bestPopulIndex].bestAgent)));
 
         // print the matrix
         if(getArgs().includes('--visualize'))
