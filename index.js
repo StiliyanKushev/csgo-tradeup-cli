@@ -31,8 +31,6 @@ init(async () => {
 });
 
 function checkFolders(){
-    if(!fs.existsSync(path.join(process.cwd(),'./dist')))
-    fs.mkdirSync(path.join(process.cwd(),'./dist'));
     if(!fs.existsSync(path.join(process.cwd(),'./evals')))
     fs.mkdirSync(path.join(process.cwd(),'./evals'));
     if(!fs.existsSync(path.join(process.cwd(),'./results')))

@@ -7,8 +7,11 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "pkg ."
-  },
+    "build-linux": "npx caxa --input . --output ./dist/csgo-tradeup-cli-linux -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/index.js\"",
+    "build-windows": "npx caxa --input . --output ./dist/csgo-tradeup-cli-windows.exe -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/index.js\"",
+    "build-macos": "npx caxa --input . --output ./dist/csgo-tradeup-cli-macos.sh -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/index.js\"",
+    "build": "npm run build-linux & npm run build-windows & npm run build-macos"
+    },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -18,14 +21,6 @@
     "node-worker-threads-pool": "^1.5.1",
     "playwright": "^1.16.3"
   },
-  "pkg": {
-    "scripts": [
-      "*.js",
-      "models/*.js",
-      "prediction/*.js"
-    ],
-    "outputPath": "dist"
-  },
   "importSorter": {
     "autoFormat": "onSave",
     "quoteMark": "single",
@@ -33,5 +28,8 @@
       "maxBindingNamesPerLine": 10
     },
     "maxLineLength": 100
+  },
+  "devDependencies": {
+    "caxa": "^2.1.0"
   }
 }
