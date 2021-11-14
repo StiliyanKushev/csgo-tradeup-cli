@@ -12,7 +12,7 @@ based on specified parameters.
 This program is for educational purposes only. I am not responsible for your actions.
 
 ## Requirements
-- MongoDB installed. (https://docs.mongodb.com/guides/server/install/)
+- MongoDB installed. (https://www.mongodb.com/try/download/community)(https://docs.mongodb.com/guides/server/install/)
 
 ## Features
 - Up to date prices and guns database.
