@@ -98,12 +98,12 @@ async function handleGeneticAlgoritm(){
 
             // replace population's best score agent
             if(isNewPopulation){
-                resultIds[bestPopId] = deserialize(serialize(populs[bestPopulIndex].bestAgent));
+                resultIds[bestPopId] = Agent.deserialize(deserialize(serialize(populs[bestPopulIndex].bestAgent)));
             }
             else {
                 // if new agent is better then save it
                 if(resultIds[bestPopId].outcome.profit < populs[bestPopulIndex].bestAgent){
-                    resultIds[bestPopId] = deserialize(serialize(populs[bestPopulIndex].bestAgent));
+                    resultIds[bestPopId] = Agent.deserialize(deserialize(serialize(populs[bestPopulIndex].bestAgent)));
                 }
                 // otherwise reset the population and search for new tradeup
                 else await reset();
