@@ -6,11 +6,8 @@
   "bin": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build-linux": "npx caxa --input . --output ./dist/csgo-tradeup-cli-linux -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/index.js\"",
-    "build-windows": "npx caxa --input . --output ./dist/csgo-tradeup-cli-windows.exe -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/index.js\"",
-    "build-macos": "npx caxa --input . --output ./dist/csgo-tradeup-cli-macos.app -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/index.js\""
-    },
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -27,8 +24,5 @@
       "maxBindingNamesPerLine": 10
     },
     "maxLineLength": 100
-  },
-  "devDependencies": {
-    "caxa": "^2.1.0"
   }
 }
