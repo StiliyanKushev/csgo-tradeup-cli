@@ -1,4 +1,4 @@
-function differentiateBy(countBy, ...arrays){
+const differentiateBy = (countBy, ...arrays) => {
     let sorted = {};
     // loop each array of skins
     for(let i = 0; i < arrays.length; i++){
@@ -16,24 +16,18 @@ function differentiateBy(countBy, ...arrays){
 }
 
 
-function randomArb(min, max){
+const randomArb = (min, max) => {
     return Math.random() * (max - min) + min;
 }
 
-function randomArr(arr, count=1){
+const randomArr = (arr, count=1) => {
     let res = [];
     for(let i = 0; i < count; i++) res.push(arr[Math.round(randomArb(0, arr.length - 1))]);
     return res.length == 1 ? res[0] : res;
 }
 
-function normalize(val, minVal, maxVal, newMin, newMax){
+const normalize = (val, minVal, maxVal, newMin, newMax) => {
     return newMin + (val - minVal) * (newMax - newMin) / (maxVal - minVal);
 };
 
-
-module.exports = {
-    differentiateBy,
-    normalize,
-    randomArb,
-    randomArr,
-}
+export { differentiateBy, normalize, randomArb, randomArr };

@@ -1,6 +1,7 @@
-const playwright = require('playwright');
-const Spy = require('./models/spy');
-const { chunk, ArrayFromChunks } = require('./prototypes/array');
+import playwright from 'playwright';
+
+import Spy from './models/spy.js';
+import { ArrayFromChunks, chunk } from './prototypes/array.js';
 
 async function genIdsSpy(skins){
     const browser = await playwright.chromium.launch({
@@ -110,6 +111,4 @@ async function generateTradespyLink(inputs, outputs, stattrak=false){
     return baseUrl + floatsUrl + idsUrlInputs + idsUrlOutputs + pricesUrl + pricesOutputsUrl;
 }
 
-module.exports = {
-    generateTradespyLink
-}
+export { generateTradespyLink };

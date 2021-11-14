@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 let spySchema = new mongoose.Schema({
     name:String,
@@ -7,4 +7,4 @@ let spySchema = new mongoose.Schema({
 
 let Spy = mongoose.model('Spy', spySchema);
 
-module.exports = Spy;
+export default Spy;

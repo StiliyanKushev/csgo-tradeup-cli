@@ -1,15 +1,15 @@
-const jsdom = require('jsdom');
-const fs = require('fs');
-const Skin = require('./models/skin');
-const Source = require('./models/source');
-const { rarityToNumber, getHighestRarity } = require('./utils/rarity');
-const { getArgsVal } = require('./cmd');
+import fs from 'fs';
+import http from 'http';
+import https from 'https';
+import jsdom from 'jsdom';
+
+import { getArgsVal } from './cmd.js';
+import Skin from './models/skin.js';
+import Source from './models/source.js';
+import { getHighestRarity, rarityToNumber } from './utils/rarity.js';
 
 const scrapeUrl = (url) => {
     return new Promise((resolve, reject) => {
-        const http      = require('http'),
-              https     = require('https');
-
         let client = http;
 
         if (url.toString().indexOf("https") === 0) {
@@ -286,8 +286,4 @@ async function updateDatabase(){
     await updateMongose(scrapedData);
 }
 
-module.exports = {
-    advancedGunScrape,
-    updateDatabase,
-    scrapeUrl
-}
+export { advancedGunScrape, scrapeUrl, updateDatabase };

@@ -10,6 +10,4 @@ async function TimedPromiseAll(promises) {
     return {result, timings};
 }
 
-module.exports = {
-    TimedPromiseAll
-}
+export { TimedPromiseAll };

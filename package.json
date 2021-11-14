@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "pkg ."
@@ -24,5 +25,13 @@
       "prediction/*.js"
     ],
     "outputPath": "dist"
+  },
+  "importSorter": {
+    "autoFormat": "onSave",
+    "quoteMark": "single",
+    "wrappingStyle": {
+      "maxBindingNamesPerLine": 10
+    },
+    "maxLineLength": 100
   }
 }

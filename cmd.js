@@ -1,7 +1,8 @@
-const colors = require('colors');
-const fs = require('fs');
-const { getArgs } = require('./utils/args');
+import 'colors';
 
+import fs from 'fs';
+
+import { getArgs } from './utils/args.js';
 
 const cmdTimer = (text) => {
     return new Promise((resolve, reject) => {
@@ -138,14 +139,14 @@ function getArgsVal(arg, type){
     return val;
 }
 
-module.exports = {
+export {
     cmdCheckArgs,
-    cmdTimer,
     cmdClear,
-    cmdHelp,
-    cmdExit,
     cmdError,
-    cmdWarn,
+    cmdExit,
+    cmdHelp,
     cmdLog,
-    getArgsVal
-}
+    cmdTimer,
+    cmdWarn,
+    getArgsVal,
+};

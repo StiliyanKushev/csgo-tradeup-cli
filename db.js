@@ -1,10 +1,13 @@
-const mongoose = require("mongoose");
-const { cmdTimer } = require("./cmd");
-const { updateDatabase } = require("./scrape");
-const colors = require('colors');
-const Skin = require('./models/skin');
-const Source = require('./models/source');
-const { getArgs } = require("./utils/args");
+import 'colors';
+
+import mongoose from 'mongoose';
+
+import { cmdTimer } from './cmd.js';
+import Skin from './models/skin.js';
+import Source from './models/source.js';
+import { updateDatabase } from './scrape.js';
+import { getArgs } from './utils/args.js';
+
 mongoose.Promise = global.Promise;
 
 let dbConnection = null;
@@ -54,10 +57,4 @@ async function clearDatabase(){
     }
 }
 
-module.exports = {
-    getConnection,
-    init,
-    buildDatabase,
-    checkEmptyDB,
-    clearDatabase
-}
+export { buildDatabase, checkEmptyDB, clearDatabase, getConnection, init };

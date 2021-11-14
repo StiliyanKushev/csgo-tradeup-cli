@@ -1,10 +1,12 @@
-const colors = require('colors');
-const { init, buildDatabase, clearDatabase, checkEmptyDB } = require('./db');
-const { cmdLog, cmdHelp, cmdExit, cmdCheckArgs, cmdWarn, cmdError } = require('./cmd');
-const main = require('./prediction');
-const fs = require('fs');
-const path = require('path');
-const { getArgs } = require('./utils/args');
+import 'colors';
+
+import fs from 'fs';
+import path from 'path';
+
+import { cmdCheckArgs, cmdError, cmdExit, cmdHelp, cmdLog, cmdWarn } from './cmd.js';
+import { buildDatabase, checkEmptyDB, clearDatabase, init } from './db.js';
+import main from './prediction/index.js';
+import { getArgs } from './utils/args.js';
 
 init(async () => {
     cmdLog('connection to mongodb established.');
@@ -56,6 +58,9 @@ function checkParams(){
             cmdError(`You can't have '${r}' (--rarity ${r}) as a valid rarity. Use '--help' for more info.`);
         })
     }
+
+    if(getArgs().includes('--avfm') && !getArgs().includes('--avf'))
+    cmdError(`'--avfm' can only be used with '--avf'.`);
 
     if(getArgs().includes('--stattrakChance') && getArgs().includes('--onlyStattrak'))
     cmdError(`You can't use both '--stattrakChance' and '--onlyStattrak'.`);

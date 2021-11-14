@@ -8,7 +8,4 @@ const setArgs = (newArgs) => {
     args = newArgs;
 }
 
-module.exports = {
-    getArgs,
-    setArgs,
-}
+export { getArgs, setArgs };

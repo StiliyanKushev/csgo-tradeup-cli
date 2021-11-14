@@ -1,9 +1,10 @@
-const Agent = require('./agent');
-const { randomArr, randomArb } = require('../utils/general');
-const { cmdClear } = require('../cmd');
-const { getValidRarity } = require('../utils/rarity');
-const { getArgs } = require('../utils/args');
-const { serialize, deserialize } = require('v8');
+import { deserialize, serialize } from 'v8';
+
+import { cmdClear } from '../cmd.js';
+import { getArgs } from '../utils/args.js';
+import { randomArb, randomArr } from '../utils/general.js';
+import { getValidRarity } from '../utils/rarity.js';
+import Agent from './agent.js';
 
 class Population {
     constructor(size, rarity, stattrak, targetProfit){
@@ -191,4 +192,4 @@ class Population {
     }
 }
 
-module.exports = Population;
+export default Population;

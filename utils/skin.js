@@ -1,7 +1,7 @@
-const Skin = require("../models/skin");
-const Source = require("../models/source");
+import Skin from '../models/skin.js';
+import Source from '../models/source.js';
 
-function getRandomSkins(numberOfSkins,searchQuery = {}){
+const getRandomSkins = (numberOfSkins,searchQuery = {}) => {
     return new Promise((resolve, reject) => {
         Skin.aggregate([
             {$match: searchQuery},
@@ -13,7 +13,7 @@ function getRandomSkins(numberOfSkins,searchQuery = {}){
     });
 }
 
-function getRandomSources(numberOfSources, searchQuery){
+const getRandomSources = (numberOfSources, searchQuery) => {
     return new Promise((resolve, reject) => {
         Source.aggregate([
             {$match: searchQuery},
@@ -26,7 +26,7 @@ function getRandomSources(numberOfSources, searchQuery){
 }
 
 // direction can be 1 or -1
-function getNextSkinFloat(float, direction=1){
+const getNextSkinFloat = (float, direction=1) => {
     let [min, max] = getSkinFloatLimits(numToSkinFloat(float));
 
     if(direction == 1){ // right
@@ -37,7 +37,7 @@ function getNextSkinFloat(float, direction=1){
     }
 }
 
-function numToSkinFloat(float){
+const numToSkinFloat = (float) => {
     if(float < 0) float = 0;
     if(float > 1) float = 1;
     
@@ -48,7 +48,7 @@ function numToSkinFloat(float){
     if(float >  0.45 && float <= 1.00)   return "BS";
 }
 
-function getSkinFloatLimits(float){
+const getSkinFloatLimits = (float) => {
     if(float == "FN") return [0.00,0.07];
     if(float == "MW") return [0.07,0.15];
     if(float == "FT") return [0.15,0.38];
@@ -56,17 +56,17 @@ function getSkinFloatLimits(float){
     if(float == "BS") return [0.45,1.00];
 }
 
-function avrgFloat(skins){
+const avrgFloat = (skins) => {
     let sum = 0;
     for(let skin of skins) sum += skin.float;
     return (sum / skins.length).toFixed(9);
 }
 
-module.exports = {
-    getSkinFloatLimits,
+export {
+    avrgFloat,
     getNextSkinFloat,
-    numToSkinFloat,
     getRandomSkins,
     getRandomSources,
-    avrgFloat
-}
+    getSkinFloatLimits,
+    numToSkinFloat,
+};

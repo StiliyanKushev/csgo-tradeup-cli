@@ -1,10 +1,10 @@
-const path = require('path');
-const Population = require(path.join(process.cwd(), './prediction/population.js'));
-const { parentPort, threadId, workerData } = require('worker_threads');
-const { init } = require('../db');
-const colors = require('colors');
-const { setArgs } = require('../utils/args');
+import path from 'path';
+import { parentPort, threadId, workerData } from 'worker_threads';
 
+import { init } from '../db.js';
+import { setArgs } from '../utils/args.js';
+
+const Population = (await import(path.join(process.cwd(), './prediction/population.js'))).default;
 const connectDatabase = () => {
     return new Promise(resolve => {
         init(() => resolve());

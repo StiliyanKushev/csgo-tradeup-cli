@@ -1,15 +1,22 @@
-const { getArgs } = require('../utils/args');
-const fs = require('fs');
-const readline = require('readline');
-const Skin = require('../models/skin');
-const { getRandomSkins, getNextSkinFloat, getSkinFloatLimits, getRandomSources } = require('../utils/skin');
-const { differentiateBy, randomArb, normalize, randomArr } = require('../utils/general');
-const { getArgsVal, cmdError, cmdExit } = require('../cmd');
-const { numberToRarity, rarityToNumber, RARITIES } = require('../utils/rarity');
-const { numToSkinFloat, avrgFloat } = require('../utils/skin');
-const { generateTradespyLink } = require('../tradeupspy');
-const Source = require('../models/source');
-const { advancedGunScrape } = require('../scrape');
+import fs from 'fs';
+import readline from 'readline';
+
+import { cmdError, getArgsVal } from '../cmd.js';
+import Skin from '../models/skin.js';
+import Source from '../models/source.js';
+import { advancedGunScrape } from '../scrape.js';
+import { generateTradespyLink } from '../tradeupspy.js';
+import { getArgs } from '../utils/args.js';
+import { differentiateBy, normalize, randomArb, randomArr } from '../utils/general.js';
+import { numberToRarity, rarityToNumber } from '../utils/rarity.js';
+import {
+    avrgFloat,
+    getNextSkinFloat,
+    getRandomSkins,
+    getRandomSources,
+    getSkinFloatLimits,
+    numToSkinFloat,
+} from '../utils/skin.js';
 
 class Agent {
     constructor(rarity, stattrak, populationId){
@@ -616,4 +623,4 @@ class Agent {
     }
 }
 
-module.exports = Agent;
+export default Agent;

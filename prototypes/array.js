@@ -11,7 +11,4 @@ function ArrayFromChunks(chunks) {
     return R;
 }
 
-module.exports = {
-    ArrayFromChunks,
-    chunk,
-}
+export { ArrayFromChunks, chunk };

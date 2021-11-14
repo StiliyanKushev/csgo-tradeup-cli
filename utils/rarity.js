@@ -1,5 +1,5 @@
-const { randomArr } = require("./general");
-const { getArgs } = require('./args');
+import { getArgs } from './args.js';
+import { randomArr } from './general.js';
 
 const RARITIES = {
     Consumer: "Consumer",
@@ -13,7 +13,7 @@ const RARITIES = {
     ALL: [ "Consumer", "Industrial", "Mil-Spec", "Restricted", "Classified", "Covert" ]
 }
 
-function rarityToNumber(rarity){
+const rarityToNumber = (rarity) => {
     rarity = rarity.toLowerCase().trim();
     if(rarity.includes("consumer")) return 1;
     if(rarity.includes("industrial")) return 2;
@@ -24,7 +24,7 @@ function rarityToNumber(rarity){
     return -1;
 }
 
-function numberToRarity(number){
+const numberToRarity = (number) => {
     if(number == 1) return RARITIES.Consumer;
     if(number == 2) return RARITIES.Industrial;
     if(number == 3) return RARITIES.MilSpec;
@@ -34,7 +34,7 @@ function numberToRarity(number){
     return "";
 }
 
-function getHighestRarity(array) {
+const getHighestRarity = (array) => {
     let highest = -1;
     let rarity;
 
@@ -51,7 +51,7 @@ function getHighestRarity(array) {
 }
 
 // function to get a random valid rarity based on arguments
-function getValidRarity(rarities, stattrak=false){
+const getValidRarity = (rarities, stattrak=false) => {
     // discard stattrak unusable rarities, discard case unusable rarities
     if(stattrak || getArgs().includes('--onlyCases'))
         for(let i = rarities.length; i >= 0; i--)
@@ -61,10 +61,4 @@ function getValidRarity(rarities, stattrak=false){
     return numberToRarity(rarityToNumber(randomArr(rarities, 1)));
 }
 
-module.exports = {
-    RARITIES,
-    rarityToNumber,
-    numberToRarity,
-    getHighestRarity,
-    getValidRarity,
-}
+export { getHighestRarity, getValidRarity, numberToRarity, RARITIES, rarityToNumber };

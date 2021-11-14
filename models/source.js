@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 let sourceSchema = new mongoose.Schema({
     name:String,
@@ -12,4 +12,4 @@ let sourceSchema = new mongoose.Schema({
 
 let Source = mongoose.model('Source', sourceSchema);
 
-module.exports = Source;
+export default Source;

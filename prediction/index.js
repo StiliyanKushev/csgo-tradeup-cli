@@ -1,15 +1,16 @@
-const fs = require('fs');
-const { cmdExit, cmdLog, cmdWarn, cmdClear } = require('../cmd');
-const Skin = require('../models/skin');
-const { randomArb } = require('../utils/general');
-const { getArgsVal } = require('../cmd');
-const { RARITIES, getValidRarity } = require('../utils/rarity');
-const Agent = require('./agent');
-const Population = require('./population');
-const { StaticPool } = require('node-worker-threads-pool');
-const path = require('path');
-const { serialize, deserialize } = require('v8');
-const { getArgs } = require('../utils/args');
+import fs from 'fs';
+import { StaticPool } from 'node-worker-threads-pool';
+import os from 'os';
+import path from 'path';
+import { deserialize, serialize } from 'v8';
+
+import { cmdClear, cmdExit, cmdLog, cmdWarn, getArgsVal } from '../cmd.js';
+import Skin from '../models/skin.js';
+import { getArgs } from '../utils/args.js';
+import { randomArb } from '../utils/general.js';
+import { getValidRarity, RARITIES } from '../utils/rarity.js';
+import Agent from './agent.js';
+import Population from './population.js';
 
 async function main(){
     await handleEval();
@@ -48,12 +49,13 @@ async function handleGeneticAlgoritm(){
     populs = await Promise.all(promises);
     cmdLog('populs generation ends.', true);
 
-    let initial = results = getArgsVal('--results', 'number') || 1;
+    let results = getArgsVal('--results', 'number') || 1;
+    let initial = results;
     let bestPopulIndex = 0; 
     let resultIds = {};
 
     const staticPool = new StaticPool({
-        size: require('os').cpus().length,
+        size: os.cpus().length,
         shareEnv: true,
         task: path.join(process.cwd(), './prediction/worker.js'),
         workerData: getArgs()
@@ -187,4 +189,4 @@ function finish(){
     cmdExit();
 }
 
-module.exports = main;
+export default main;
