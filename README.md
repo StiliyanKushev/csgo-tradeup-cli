@@ -12,6 +12,7 @@ based on specified parameters.
 This program is for educational purposes only. I am not responsible for your actions.
 
 ## Requirements
+- NodeJS installed. (https://nodejs.org/en/download/)
 - MongoDB installed. (https://www.mongodb.com/try/download/community) (https://docs.mongodb.com/guides/server/install/)
 
 ## Features
@@ -21,17 +22,9 @@ This program is for educational purposes only. I am not responsible for your act
 - Tradeupspy.com link generation.
 
 ## Usage
-You can either use the git repo..
-
 ```sh
 git clone https://github.com/StiliyanKushev/csgo-tradeup-cli.git
 cd csgo-tradeup-cli
 npm i
 node index --help
-```
-
-Or use the latest release...
-
-```sh
-csgo-tradeup-cli --help
 ```
