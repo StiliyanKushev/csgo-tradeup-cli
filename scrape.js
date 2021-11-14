@@ -6,6 +6,7 @@ import jsdom from 'jsdom';
 import { getArgsVal } from './cmd.js';
 import Skin from './models/skin.js';
 import Source from './models/source.js';
+import { getArgs } from './utils/args.js';
 import { getHighestRarity, rarityToNumber } from './utils/rarity.js';
 
 const scrapeUrl = (url) => {
