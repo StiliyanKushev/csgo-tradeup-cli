@@ -6,6 +6,7 @@ import jsdom from 'jsdom';
 import { getArgsVal } from './cmd.js';
 import Skin from './models/skin.js';
 import Source from './models/source.js';
+import { getArgs } from './utils/args.js';
 import { getHighestRarity, rarityToNumber } from './utils/rarity.js';
 
 const scrapeUrl = (url) => {
@@ -39,7 +40,7 @@ async function getGunsSources() {
     let res = [];
     let scraped = await scrapeUrl("https://csgostash.com/");
     let dom = new jsdom.JSDOM(scraped);
-    all = [...dom.window.document.getElementsByClassName("navbar-nav")[0].children]
+    let all = [...dom.window.document.getElementsByClassName("navbar-nav")[0].children]
     Array.prototype.slice.call(all).map((p, i) => {
         if(i != 6 && i != 7) return; // only leave the relevant drop downs menues and skip knives
         [...p.children[1].children].map(e => {
