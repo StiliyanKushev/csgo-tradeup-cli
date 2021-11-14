@@ -30,9 +30,3 @@ Or use the latest release...
 ```sh
 csgo-tradeup-cli --help
 ```
-
-## License
-Copyright (C) Stiliyan Kushev - All Rights Reserved
-Unauthorized copying of this file/project, via any medium is strictly prohibited
-Proprietary and confidential
-Written by Stiliyan Kushev <stiliyankushev@gmail.com>, November 2021
