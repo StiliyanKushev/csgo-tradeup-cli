@@ -21,6 +21,7 @@ This program is for educational purposes only. I am not responsible for your act
 - Ability to override prices of skins, include/exclude collections, and more.
 - Variaty of options to get exactly what you're looking for.
 - Tradeupspy.com link generation.
+- Fast. Uses genetic algorithm and worker threads.
 
 ## Usage
 ```sh
