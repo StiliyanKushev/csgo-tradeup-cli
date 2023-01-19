@@ -3,7 +3,7 @@ import 'colors';
 import fs from 'fs';
 import path from 'path';
 
-import { cmdCheckArgs, cmdError, cmdExit, cmdHelp, cmdLog, cmdWarn } from './cmd.js';
+import { cmdCheckArgs, cmdError, cmdExit, cmdHelp, cmdLog, cmdWarn, getArgsVal } from './cmd.js';
 import { buildDatabase, checkEmptyDB, clearDatabase, init } from './db.js';
 import main from './prediction/index.js';
 import { getArgs } from './utils/args.js';
