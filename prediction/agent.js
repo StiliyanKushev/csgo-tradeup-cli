@@ -229,7 +229,7 @@ class Agent {
                     sourcesQuery.$or.splice(i, 1);
     
                     // add source regex case to the query
-                    sourcesQuery.name = { $regex: 'Case', $options: 'igm' }
+                    sourcesQuery.name = { $regex: 'Case', $options: 'im' }
                 }
                 else if(getArgs().includes('--onlyCollections')){
                     // remove matches from $or and $and
@@ -238,7 +238,7 @@ class Agent {
                     sourcesQuery.$or.splice(i, 1);
     
                     // add source regex case to the query
-                    sourcesQuery.name = { $regex: '^((?!Case).)*$', $options: 'igm' }
+                    sourcesQuery.name = { $regex: '^((?!Case).)*$', $options: 'im' }
                 }
             }
             
@@ -287,12 +287,12 @@ class Agent {
             // there are not stattrak skins in collections
             if(this.stattrak || getArgs().includes('--onlyCases')){
                 query.$and.push({
-                    source: { $regex: 'Case', $options: 'igm' }
+                    source: { $regex: 'Case', $options: 'im' }
                 });
             }
             else if(getArgs().includes('--onlyCollections')){
                 query.$and.push({
-                    source: { $regex: '^((?!Case).)*$', $options: 'igm' }
+                    source: { $regex: '^((?!Case).)*$', $options: 'im' }
                 });
             }
         }
@@ -593,6 +593,17 @@ class Agent {
                                           : (input[getNextSkinFloat(input.float, 1)] || {});
                 currentInputCost = left.stashVal > right.stashVal ? left : right;
             }
+
+            // we might want to simulate a crisis level
+            // that way even if the price is not 100% correct we can still get a good estimate
+            if(getArgs().includes('--crisisLevel') && !input.priceAltered){
+                const currentInputValue = currentInputCost.stashVal;
+                const priceOffsetPercentage = getArgsVal('--crisisLevel', 'number')
+                const priceOffsetValue = currentInputValue * priceOffsetPercentage / 100;
+                currentInputCost.stashVal = currentInputValue + priceOffsetValue;
+                input.priceAltered = true;
+            }
+
             input.price = currentInputCost.stashVal;
             inputsCost += currentInputCost.stashVal;
         }
@@ -603,6 +614,15 @@ class Agent {
                 this.stattrak ? output.STAT_TRAK[numToSkinFloat(output.float)].stashVal
                               : output[numToSkinFloat(output.float)].stashVal
                 ,0);
+
+            // we might want to simulate a crisis level
+            // that way even if the price is not 100% correct we can still get a good estimate
+            if(getArgs().includes('--crisisLevel')){
+                const priceOffsetPercentage = getArgsVal('--crisisLevel', 'number')
+                const priceOffsetValue = output.price * priceOffsetPercentage / 100;
+                output.price = output.price - priceOffsetValue;
+            }
+
             expectedValue += output.price * output.chance / 100;
         }
 

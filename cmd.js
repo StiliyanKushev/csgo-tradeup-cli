@@ -59,6 +59,7 @@ const cmdHelp = (print=true) => {
     `--exclude           -> Exclude all cases/collections in a given file. (each new line) (Ex: --exclude './file.txt')`                            + '\n' +
     `--include           -> Include only cases/collections in a given file. (each new line) (Ex: --include './file.txt')`                           + '\n' +
     `--override          -> Override prices of skins. (each new line) (Ex: --override './file.txt') (Format: 'name#condition#price#st')`            + '\n' +
+    `--crisisLevel       -> Makes input prices a bit more expensive than DB shows, and makes outputs a bit more cheap. Number between 0 and 100%`   + '\n' +
     `--spy               -> Generate a tradeupspy link for successful tradeup or when using --eval.`;
     
     if(print) { 

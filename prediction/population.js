@@ -97,13 +97,22 @@ class Population {
             sumFitness += agent.fitness;
         });
 
+        if(sumFitness == 0) {
+            // if the sum of fitness is 0, then the population is stuck
+            // meaning all agents are stuck in a local minimum
+            // so we reset the population
+            await this.reset();
+            await this.matingPool();
+            return;
+        }
+
         // generate mating pool based on the fitness
         let matingPool = [];
 
         this.data.map(agent => {
-            let imporatnce = Math.round(100 / (sumFitness / agent.fitness));
-            if(imporatnce == 0) return;
-            matingPool.push(...new Array(imporatnce).fill(agent));
+            let importance = Math.round(100 / (sumFitness / agent.fitness));
+            if(importance == 0) return;
+            matingPool.push(...new Array(importance).fill(agent));
         });
 
         this.pool = matingPool;
@@ -138,6 +147,11 @@ class Population {
     getColoredSquare(agent) {
         if(agent.outcome.profit >= this.targetProfit) 
         return { square:'■ '.green, color: 'green' };
+
+        // if the agent is really close to the target profit (10%) paint it cyan
+        if(agent.outcome.profit >= this.targetProfit * 0.90)
+        return { square:'■ '.cyan, color: 'cyan' };
+
         if(agent.outcome.profit <= this.targetProfit / 4) 
         return { square:'■ '.red, color: 'red' };
         if(agent.outcome.profit > this.targetProfit / 4 && agent.outcome.profit <= this.targetProfit / 2) 

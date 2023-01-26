@@ -82,7 +82,7 @@ async function handleGeneticAlgoritm(){
         Population.visualize(populs);
 
         // print current best result
-        console.log(`max profit = ${bestAgent.outcome.profit}`);
+        console.log(`max profit = ${bestAgent.outcome.profit} [stopping at ${targetProfit}]`);
         cmdLog('genetic selection ends.', true);
 
         // end condition

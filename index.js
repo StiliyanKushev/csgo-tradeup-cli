@@ -13,10 +13,11 @@ init(async () => {
     checkFolders();
     cmdCheckArgs();
     checkParams();
-    await checkEmptyDB();
 
     if(getArgs().includes('--help'))
     cmdHelp();
+
+    await checkEmptyDB();
 
     if(getArgs().includes('--cd'))
     await clearDatabase();
@@ -46,11 +47,13 @@ function checkParams(){
     if(getArgs().includes('--noLoss') && getArgsVal('--profit', 'number') < 100)
     cmdError(`You can't have a '--profit' value of less then 100 when using '--noLoss.'`);
 
+    if(getArgsVal('--crisisLevel', 'number') < 0 || getArgsVal('--crisisLevel', 'number') > 100)
+    cmdError(`'--crisisLevel' must be between 0 and 100.`);
+
     if(getArgs().includes('--onlyCases') && getArgs().includes('--onlyCollections'))
     cmdError(`You can't use both '--onlyCases' and '--onlyCollections'`);
 
     if(getArgs().includes('--rarity')){
-        RARITIES.ALL_INPUTS.includes()
         getArgsVal('--rarity', 'string').split(',').map(r => {
             if(!RARITIES.ALL_INPUTS.includes(r))
             cmdError(`You can't have '${r}' (--rarity ${r}) as a valid rarity. Use '--help' for more info.`);
