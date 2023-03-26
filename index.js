@@ -96,4 +96,7 @@ function checkParams(){
 
     if(getArgs().includes('--sdb')) 
     cmdWarn(`'--sdb' is used. Saving database is only done if '--bd' is used, or your database is empty.`);
+
+    if(getArgsVal('--sources', 'number') == 0)
+    cmdError(`You can't have '--sources' value be 0. Use '--help' for more info.`);
 }

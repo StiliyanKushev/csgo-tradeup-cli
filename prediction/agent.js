@@ -140,12 +140,12 @@ class Agent {
 
         // count each
         for(let source of sources){
-            if(source.Consumer) all.Consumer.push(source.name);
-            if(source.Industrial) all.Industrial.push(source.name);
-            if(source['Mil-Spec']) all['Mil-Spec'].push(source.name);
-            if(source.Restricted) all.Restricted.push(source.name);
-            if(source.Classified) all.Classified.push(source.name);
-            if(source.Covert) all.Covert.push(source.name);
+            if(source.Consumer)         all.Consumer.push(source.name);
+            else if(source.Industrial)  all.Industrial.push(source.name);
+            else if(source['Mil-Spec']) all['Mil-Spec'].push(source.name);
+            else if(source.Restricted)  all.Restricted.push(source.name);
+            else if(source.Classified)  all.Classified.push(source.name);
+            else if(source.Covert)      all.Covert.push(source.name);
         }
         
         // filter all and leave only the full rarities
@@ -156,6 +156,11 @@ class Agent {
         // convert to array of strings/names
         let rarities = [];
         for(let key in all) rarities.push(key);
+
+        // if no common rarities found, abort
+        if(rarities.length == 0) {
+            cmdError(`No common rarities for this query found! Aborting...`);
+        }
 
         // stringify the rarities
         if(returnString) rarities = rarities.reduce((p,c) => p+'\n'+c);
@@ -246,8 +251,14 @@ class Agent {
             let randomSources = await getRandomSources(numSources, sourcesQuery);
 
             // no sources available for the selected rarity
-            if(randomSources.length == 0)
-            printCommonRaritiesError((await this.getCommonRarities(sourcesQuery, query.rarity, true))[1])
+            if(randomSources.length == 0) {
+                if(getArgs().includes('--exclude') || getArgs().includes('--include')) {
+                    printCommonRaritiesError((await this.getCommonRarities(sourcesQuery, query.rarity, true))[1])
+                }
+                else {
+                    cmdError(`No sources available for the selected rarity '${query.rarity}'!`);
+                }
+            }
 
             // generate query rules for each
             let rules = [];
