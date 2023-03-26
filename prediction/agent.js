@@ -251,7 +251,7 @@ class Agent {
 
             // generate query rules for each
             let rules = [];
-            for(let i = 0; i < numSources; i++)
+            for(let i = 0; i < randomSources.length; i++)
             rules.push({ source: randomSources[i].name });
 
             // apply new sources to the query
