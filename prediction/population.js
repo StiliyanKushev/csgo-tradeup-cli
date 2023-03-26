@@ -1,6 +1,6 @@
 import { deserialize, serialize } from 'v8';
 
-import { cmdClear } from '../cmd.js';
+import { cmdClear, getArgsVal } from '../cmd.js';
 import { getArgs } from '../utils/args.js';
 import { randomArb, randomArr } from '../utils/general.js';
 import { getValidRarity } from '../utils/rarity.js';

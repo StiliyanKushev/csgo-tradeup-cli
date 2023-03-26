@@ -7,6 +7,7 @@ import { cmdCheckArgs, cmdError, cmdExit, cmdHelp, cmdLog, cmdWarn, getArgsVal }
 import { buildDatabase, checkEmptyDB, clearDatabase, init } from './db.js';
 import main from './prediction/index.js';
 import { getArgs } from './utils/args.js';
+import { RARITIES } from './utils/rarity.js';
 
 init(async () => {
     cmdLog('connection to mongodb established.');

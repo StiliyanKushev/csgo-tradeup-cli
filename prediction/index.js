@@ -81,13 +81,15 @@ async function handleGeneticAlgoritm(){
         if(getArgs().includes('--visualize'))
         Population.visualize(populs);
 
+        const hasNoLoss = getArgs().includes('--noLoss')
+
         // print current best result
-        console.log(`max profit = ${bestAgent.outcome.profit} [stopping at ${targetProfit}]`);
+        console.log(`max profit = ${bestAgent.outcome.profit} [target at ${targetProfit}] ${hasNoLoss ? '[no-loss]' : ''}`);
         cmdLog('genetic selection ends.', true);
 
         // end condition
         if (bestAgent.outcome.profit > targetProfit){
-            if(getArgs().includes('--noLoss') && bestAgent.hasLoss()) { await reset(); continue; }
+            if(hasNoLoss && bestAgent.hasLoss()) { await reset(); continue; }
 
             // decrease results only if it's from a new population
             let bestPopId = populs[bestPopulIndex].id;

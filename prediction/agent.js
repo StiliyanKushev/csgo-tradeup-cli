@@ -408,7 +408,7 @@ class Agent {
             let savePath = filename ? `./evals/${filename}` : `./evals/${nameFile}`
             if(fileNameIsPath === true) savePath = filename;
             fs.writeFileSync(savePath, JSON.stringify(result, null, '\t'));
-            if(printSpyMsg.msg) console.log(`${nameFile} has been saved in /evals/`.bgCyan.black);
+            if(printSpyMsg.msg) console.log(`${nameFile} has been saved in ${fileNameIsPath ? '/results/' : '/evals/'}`.bgCyan.black);
         }
         else {
             let nameFile = `inputs_${this.populationId}.json`;
