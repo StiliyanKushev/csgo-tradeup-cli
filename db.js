@@ -2,7 +2,7 @@ import 'colors';
 
 import mongoose from 'mongoose';
 
-import { cmdTimer } from './cmd.js';
+import { cmdTimer, cmdWarn } from './cmd.js';
 import Skin from './models/skin.js';
 import Source from './models/source.js';
 import { updateDatabase } from './scrape.js';
@@ -27,10 +27,14 @@ function init(onReady) {
 }
 
 async function buildDatabase(){
-    console.log("Building the database. This may take a few minutes.".bgCyan.black);
-        
-    // give time to cancel
-    await cmdTimer("Ctrl-C to cancel".bgRed.white);
+    if(!getArgs().includes('--json')) {
+        console.log("Building the database. This may take a few minutes.".bgCyan.black);
+        // give time to cancel
+        await cmdTimer("Ctrl-C to cancel".bgRed.white);
+    }
+    else {
+        cmdWarn(`Using prebuilt database. Using "--json" may give outdated results.`)
+    }
     await clearDatabase();
 
     // fetch all of the skins and put them into a mongo DB database

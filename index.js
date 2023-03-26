@@ -26,6 +26,9 @@ init(async () => {
     if(getArgs().includes('--bd'))
     await buildDatabase();
 
+    if(getArgs().includes('--json'))
+    await buildDatabase();
+
     await main();
 
     // exit at the end
@@ -90,4 +93,7 @@ function checkParams(){
 
     if(getArgs().includes('--smart')) 
     cmdWarn(`'--smart' is used. This affects the speed of the program.`);
+
+    if(getArgs().includes('--sdb')) 
+    cmdWarn(`'--sdb' is used. Saving database is only done if '--bd' is used, or your database is empty.`);
 }
