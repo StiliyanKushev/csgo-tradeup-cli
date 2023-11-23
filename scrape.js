@@ -1,7 +1,7 @@
 import fs from 'fs';
-import http from 'http';
-import https from 'https';
 import jsdom from 'jsdom';
+import followRedirects from 'follow-redirects';
+const { http, https } = followRedirects;
 
 import { getArgsVal } from './cmd.js';
 import Skin from './models/skin.js';
