@@ -37,32 +37,41 @@ async function genIdsSpy(skins){
             if(spyDoc) id = spyDoc.CSGO_SPY_ID;
             // otherwise scrape and generate new one
             else {
-                const page = await context.newPage();
-                await page.goto("https://www.tradeupspy.com/skins/");
-                await page.exposeFunction('waitForSelector', async (cssSelector) => {
-                    await await page.waitForSelector(cssSelector);
-                });
-                id = await page.evaluate(async (inputName) => {
-                    // trigger gun search
-                    let input = document.getElementById("input_search_skin");
-                    input.value = inputName;
-                    input.dispatchEvent(new Event('keyup'));
-    
-                    // wait for gun to be found
-                    await window.waitForSelector(".searched_skins_container_enabled>a");
-    
-                    // extract the gun id
-                    let gun = document.getElementsByClassName("searched_skins_container_enabled")[0];
-                    let skinUrl = gun.children[0].href.split('/');
-                    let id = skinUrl[skinUrl.length - 2];
-                    return id;
-                }, skin.name);
-    
-                // close page
-                page.close();
-    
-                // push the new skin spy id to the database
-                await new Spy({ name: skin.name , CSGO_SPY_ID: id }).save();
+                await (async function fetchId() {
+                    const page = await context.newPage();
+                    await page.goto("https://www.tradeupspy.com/skins/");
+                    await page.exposeFunction('waitForSelector', async (cssSelector) => {
+                        await page.waitForSelector(cssSelector);
+                    });
+                    try {
+                        id = await page.evaluate(async (inputName) => {
+                            // trigger gun search
+                            let input = document.getElementById("input_search_skin");
+                            input.value = inputName;
+                            input.dispatchEvent(new Event('keyup'));
+            
+                            // wait for gun to be found
+                            await window.waitForSelector(".searched_skins_container_enabled>a");
+            
+                            // extract the gun id
+                            let gun = document.getElementsByClassName("searched_skins_container_enabled")[0];
+                            let skinUrl = gun.children[0].href.split('/');
+                            let id = skinUrl[skinUrl.length - 2];
+                            return id;
+                        }, skin.name);
+
+                        // close page
+                        page.close();
+            
+                        // push the new skin spy id to the database
+                        await new Spy({ name: skin.name , CSGO_SPY_ID: id }).save();
+                    }
+                    catch {
+                        // attempt again, the page got stuck.
+                        // (chromium base driver bug)
+                        await fetchId();
+                    }
+                })();
             }
     
             // set the skin spyId at the end
