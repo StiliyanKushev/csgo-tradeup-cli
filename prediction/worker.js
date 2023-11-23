@@ -1,10 +1,13 @@
 import path from 'path';
+import os from 'os';
 import { parentPort, threadId, workerData } from 'worker_threads';
 
 import { init } from '../db.js';
 import { setArgs } from '../utils/args.js';
 
-const Population = (await import(path.join(process.cwd(), './prediction/population.js'))).default;
+const importPrefix = os.platform() == 'win32' ? 'file://' : '';
+
+const Population = (await import(path.join(importPrefix + process.cwd(), './prediction/population.js'))).default;
 const connectDatabase = () => {
     return new Promise(resolve => {
         init(() => resolve());
